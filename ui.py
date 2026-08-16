@@ -4732,7 +4732,7 @@ class BootSequenceOverlay(QWidget):
             })
 
     def start(self, device_name: str = "", greeting_name: str = ""):
-        self._device_name = (device_name or platform.node() or os.environ.get("COMPUTERNAME") or "DEVICE").strip()
+        self._device_name = (device_name or os.environ.get("USERNAME") or os.environ.get("USER") or platform.node() or os.environ.get("COMPUTERNAME") or "DEVICE").strip()
         self._greeting_name = (greeting_name or self._device_name).strip() or self._device_name
         self._phase = 0
         self._phase_text = "WELCOME"
@@ -9257,7 +9257,7 @@ class MAMATUI:
         overlay = BootSequenceOverlay()
         self._boot_overlay = overlay
 
-        device_name = platform.node() or os.environ.get("COMPUTERNAME") or "DEVICE"
+        device_name = os.environ.get("USERNAME") or os.environ.get("USER") or platform.node() or os.environ.get("COMPUTERNAME") or "DEVICE"
 
         def _done():
             self._mark_boot_sequence_played()

@@ -18,7 +18,7 @@ DEFAULT_CITY = "Kalyan"
 def get_time_based_greeting(device_name: str = "") -> str:
     """Returns a time-based greeting in Malay starting with Salam, {device_name}."""
     if not device_name:
-        device_name = platform.node() or os.environ.get("COMPUTERNAME") or os.environ.get("USERNAME") or "USER"
+        device_name = os.environ.get("USERNAME") or os.environ.get("USER") or platform.node() or os.environ.get("COMPUTERNAME") or "USER"
     hour = datetime.now().hour
     if 5 <= hour < 12:
         greeting = f"Salam, {device_name}. Selamat pagi."
@@ -209,7 +209,7 @@ def generate_ai_suggestions(system_state: dict, workspace_state: dict) -> str:
 def compile_daily_briefing(settings: dict) -> str:
     """Compiles the daily briefing speech text based on user settings."""
     briefing_sections = []
-    device_name = settings.get("user_name") or settings.get("device_name") or platform.node() or os.environ.get("COMPUTERNAME") or os.environ.get("USERNAME") or "USER"
+    device_name = settings.get("user_name") or settings.get("device_name") or os.environ.get("USERNAME") or os.environ.get("USER") or platform.node() or os.environ.get("COMPUTERNAME") or "USER"
 
     # 1. Voice Greeting (Time-based greeting)
     if settings.get("daily_briefing_voice_greeting", True):
