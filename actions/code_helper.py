@@ -36,10 +36,20 @@ def _get_api_key() -> str:
         return json.load(f)["gemini_api_key"]
 
 
+class _GeminiWrapper:
+    def __init__(self, model_name: str = GEMINI_MODEL):
+        from google import genai
+        self.model_name = model_name
+        self.client = genai.Client(api_key=_get_api_key(), http_options={"api_version": "v1beta"})
+
+    def generate_content(self, contents):
+        return self.client.models.generate_content(
+            model=self.model_name,
+            contents=contents,
+        )
+
 def _get_gemini(model: str = GEMINI_MODEL):
-    import google.generativeai as genai
-    genai.configure(api_key=_get_api_key())
-    return genai.GenerativeModel(model)
+    return _GeminiWrapper(model)
 
 
 def _clean_code(text: str) -> str:

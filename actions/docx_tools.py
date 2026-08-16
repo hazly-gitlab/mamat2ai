@@ -64,11 +64,19 @@ def _get_api_key() -> str:
         return json.load(f)["gemini_api_key"]
 
 
-def _gemini_client():
-    import google.generativeai as genai
+class _GeminiDocxWrapper:
+    def __init__(self):
+        from google import genai
+        self.client = genai.Client(api_key=_get_api_key(), http_options={"api_version": "v1beta"})
 
-    genai.configure(api_key=_get_api_key())
-    return genai.GenerativeModel("gemini-2.5-flash")
+    def generate_content(self, contents):
+        return self.client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=contents,
+        )
+
+def _gemini_client():
+    return _GeminiDocxWrapper()
 
 
 def _import_docx():

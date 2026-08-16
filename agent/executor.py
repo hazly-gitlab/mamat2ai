@@ -27,7 +27,7 @@ def _get_api_key() -> str:
         return json.load(f)["gemini_api_key"]
 
 def _run_generated_code(description: str, speak: Callable | None = None) -> str:
-    import google.generativeai as genai
+    from google import genai
 
     if speak:
         speak("Writing custom code for this task, sir.")
@@ -128,14 +128,14 @@ def _inject_context(params: dict, tool: str, step_results: dict, goal: str = "")
 
     return params
 def _detect_language(text: str) -> str:
-    import google.generativeai as genai
-    genai.configure(api_key=_get_api_key())
-    model = genai.GenerativeModel("gemini-2.5-flash-lite")
+    from google import genai
+    client = genai.Client(api_key=_get_api_key(), http_options={"api_version": "v1beta"})
     try:
-        response = model.generate_content(
-            f"What language is this text written in? "
-            f"Reply with ONLY the language name in English (e.g. Turkish, English, French).\n\n"
-            f"Text: {text[:200]}"
+        response = client.models.generate_content(
+            model="gemini-2.5-flash-lite",
+            contents=f"What language is this text written in? "
+                     f"Reply with ONLY the language name in English (e.g. Turkish, English, French).\n\n"
+                     f"Text: {text[:200]}"
         )
         return response.text.strip()
     except Exception:
@@ -146,9 +146,8 @@ def _translate_to_goal_language(content: str, goal: str) -> str:
     if not goal:
         return content
     try:
-        import google.generativeai as genai
-        genai.configure(api_key=_get_api_key())
-        model = genai.GenerativeModel("gemini-2.5-flash")
+        from google import genai
+        client = genai.Client(api_key=_get_api_key(), http_options={"api_version": "v1beta"})
 
         target_lang = _detect_language(goal)
         print(f"[Executor] 🌐 Translating to: {target_lang}")
@@ -163,7 +162,10 @@ def _translate_to_goal_language(content: str, goal: str) -> str:
             f"- Output ONLY the translated text, nothing else\n\n"
             f"Text to translate:\n{content[:4000]}"
         )
-        response = model.generate_content(prompt)
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt,
+        )
         translated = response.text.strip()
         print(f"[Executor] ✅ Translation done ({target_lang})")
         return translated
@@ -382,9 +384,8 @@ class AgentExecutor:
     def _summarize(self, goal: str, completed_steps: list, speak: Callable | None) -> str:
         fallback = f"All done, sir. Completed {len(completed_steps)} steps for: {goal[:60]}."
         try:
-            import google.generativeai as genai
-            genai.configure(api_key=_get_api_key())
-            model     = genai.GenerativeModel(model_name="gemini-2.5-flash-lite")
+            from google import genai
+            client    = genai.Client(api_key=_get_api_key(), http_options={"api_version": "v1beta"})
             steps_str = "\n".join(f"- {s.get('description', '')}" for s in completed_steps)
             prompt    = (
                 f'User goal: "{goal}"\n'
@@ -392,7 +393,10 @@ class AgentExecutor:
                 "Write a single natural sentence summarizing what was accomplished. "
                 "Address the user as 'sir'. Be direct and positive."
             )
-            response = model.generate_content(prompt)
+            response = client.models.generate_content(
+                model="gemini-2.5-flash-lite",
+                contents=prompt,
+            )
             summary  = response.text.strip()
             if speak: speak(summary)
             return summary
