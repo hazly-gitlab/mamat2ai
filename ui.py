@@ -39,7 +39,7 @@ from PyQt6.QtWidgets import (
 from discord_bot import DiscordBotService
 from gesture_utils import estimate_gesture_state
 from smart_home import SmartHomeService
-from smart_home_page_new import BrahmaHomePage, _DeviceTile
+from smart_home_page_new import MAMATHomePage, _DeviceTile
 from workspace_store import store as workspace_store
 
 def _base_dir() -> Path:
@@ -52,8 +52,8 @@ CONFIG_DIR = BASE_DIR / "config"
 API_FILE   = CONFIG_DIR / "api_keys.json"
 APP_SETTINGS_FILE = CONFIG_DIR / "app_settings.json"
 DISCORD_SETTINGS_FILE = CONFIG_DIR / "discord_bot.json"
-LOGO_FILE  = BASE_DIR / "assets" / "Brahma_Lite_Logo.png"
-LOGO_ICO   = BASE_DIR / "assets" / "Brahma_Lite_Logo.ico"
+LOGO_FILE  = BASE_DIR / "assets" / "MAMAT_Logo.png"
+LOGO_ICO   = BASE_DIR / "assets" / "MAMAT_Logo.ico"
 BACKGROUND_IMAGE_FILE = BASE_DIR / "assets" / "background.png"
 MODEL_DOWNLOAD_URL = "https://storage.googleapis.com/mediapipe-assets/hand_landmarker.task"
 
@@ -317,7 +317,7 @@ class RemoteKeyOverlay(QWidget):
         self._qr_label.setText("OK")
         self._qr_label.setFont(QFont("Segoe UI", 34, QFont.Weight.Black))
         self._qr_label.setStyleSheet("color: #37ff5f; background: #041006; border-radius: 12px;")
-        self._timer_lbl.setText("Phone connected. Brahma remote is ready.")
+        self._timer_lbl.setText("Phone connected. MAMAT remote is ready.")
 
     def _refresh_key(self):
         if not self._on_new_key:
@@ -1547,9 +1547,9 @@ class HudCanvas(QWidget):
         p.setFont(title_font)
         y_title = cy - 25
         p.setPen(QColor(245, 248, 255, 235))
-        p.drawText(QRectF(cx - 120, y_title, 130, 48), Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter, "Brah")
+        p.drawText(QRectF(cx - 120, y_title, 130, 48), Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter, "MA")
         p.setPen(QColor(255, 98, 98, 245))
-        p.drawText(QRectF(cx + 8, y_title, 90, 48), Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, "ma")
+        p.drawText(QRectF(cx + 8, y_title, 110, 48), Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, "MAT")
         p.setFont(QFont("Segoe UI", int(max(8, fw * 0.018)), QFont.Weight.Bold))
         p.setPen(QColor(190, 196, 205, 190))
         p.drawText(QRectF(cx - 90, cy + 18, 180, 22), Qt.AlignmentFlag.AlignCenter, "AI ASSISTANT")
@@ -1776,7 +1776,7 @@ class TaskCard(QFrame):
         self._command_lbl.setStyleSheet(f"color: {C.WHITE}; background: transparent;")
         lay.addWidget(self._command_lbl)
 
-        self._plan_lbl = QLabel("Plan: Brahma will generate a task plan after you send a command.")
+        self._plan_lbl = QLabel("Plan: MAMAT will generate a task plan after you send a command.")
         self._plan_lbl.setWordWrap(True)
         self._plan_lbl.setFont(QFont("Segoe UI", 9))
         self._plan_lbl.setStyleSheet(f"color: {C.TEXT_MED}; background: transparent;")
@@ -1828,7 +1828,7 @@ class TaskCard(QFrame):
         self._title.setText(title)
         self._status_lbl.setText(desc)
         self._output_lbl.setText(desc)
-        self._plan_lbl.setText("Plan: Brahma will generate a task plan after you send a command.")
+        self._plan_lbl.setText("Plan: MAMAT will generate a task plan after you send a command.")
         self._command_lbl.setText("Command: waiting for input")
         self._pct.setText(f"{percent}%")
         self._bar.setValue(max(0, min(100, percent)))
@@ -1897,7 +1897,7 @@ class TaskCard(QFrame):
         self._workspace_locked = False
         self._title.setText("Ready")
         self._command_lbl.setText("Command: waiting for input")
-        self._plan_lbl.setText("Plan: Brahma will generate a task plan after you send a command.")
+        self._plan_lbl.setText("Plan: MAMAT will generate a task plan after you send a command.")
         self._status_lbl.setText("Status: Idle")
         self._output_lbl.setText("Output: Ready to work.")
         self._pct.setText("0%")
@@ -2309,7 +2309,7 @@ class HistoryConversationItem(QFrame):
         lay.setContentsMargins(10, 8, 10, 8)
         lay.setSpacing(10)
 
-        icon = QLabel("B")
+        icon = QLabel("M")
         icon.setFixedSize(30, 30)
         icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
         icon.setStyleSheet("background: rgba(255,69,69,0.10); color: #ff7777; border: 1px solid rgba(255,69,69,0.28); border-radius: 15px; font: 700 11pt 'Segoe UI';")
@@ -2403,7 +2403,7 @@ class ConversationFeed(QScrollArea):
         lay = QVBoxLayout(frame)
         lay.setContentsMargins(14, 12, 14, 12)
         lay.setSpacing(10)
-        title = QLabel("Try asking Brahma")
+        title = QLabel("Try asking MAMAT")
         title.setFont(QFont("Segoe UI", 9, QFont.Weight.Bold))
         title.setStyleSheet("color: #ffffff; background: transparent;")
         subtitle = QLabel("Create a presentation, analyze a screen, build a website, organize files, or run browser automation.")
@@ -2506,10 +2506,10 @@ class ConversationFeed(QScrollArea):
             attachments = msg.get("attachments") or []
             name = {
                 "user": "You",
-                "assistant": "Brahma",
+                "assistant": "MAMAT",
                 "system": "System",
                 "file": "Files",
-            }.get(role, "Brahma")
+            }.get(role, "MAMAT")
             self.add_message(role, name, content, stamp, attachments=attachments, animate=False)
         self._sync_empty_state()
         QTimer.singleShot(0, self.scroll_to_bottom)
@@ -2701,7 +2701,7 @@ class WorkspaceSidebar(QWidget):
         self._title.setStyleSheet("color: #FFFFFF; background: transparent; letter-spacing: 1px;")
         header.addWidget(self._title)
         header.addStretch()
-        self._close_btn = QPushButton("BRAHMA")
+        self._close_btn = QPushButton("MAMAT")
         self._close_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self._close_btn.setFixedHeight(30)
         self._close_btn.setFont(QFont("Segoe UI", 9, QFont.Weight.Bold))
@@ -3130,7 +3130,7 @@ class WorkspaceSidebar(QWidget):
         if not raw:
             return
         low = raw.lower()
-        if low.startswith(("you:", "brahma ai:")):
+        if low.startswith(("you:", "mamat ai:")):
             return
         if low.startswith("sys:"):
             self.record_chat_event({"role": "system", "text": raw.split(":", 1)[1].strip(), "source": "local"})
@@ -3153,7 +3153,7 @@ class WorkspaceSidebar(QWidget):
         elif role == "assistant":
             convo_id = self._store.record_chat("assistant", text, conversation_id=convo_id, attachments=attachments)
             self._active_conversation_id = convo_id
-            self._feed.add_message("assistant", "Brahma", text, _fmt_time_stamp(stamp), attachments=attachments, animate=True)
+            self._feed.add_message("assistant", "MAMAT", text, _fmt_time_stamp(stamp), attachments=attachments, animate=True)
             self._hide_memory_banner()
         elif role == "system":
             convo_id = self._store.record_chat("system", text, conversation_id=convo_id, attachments=attachments)
@@ -3463,7 +3463,7 @@ class InlineChatWorkspace(QFrame):
             self._show_memories(self._store.search_memories(text))
         elif role == "assistant":
             self._store.record_chat("assistant", text, conversation_id=convo_id, attachments=attachments)
-            self._feed.add_message("assistant", "Brahma", text, stamp, attachments=attachments)
+            self._feed.add_message("assistant", "MAMAT", text, stamp, attachments=attachments)
             self._hide_memories()
         elif role == "system":
             self._store.record_chat("system", text, conversation_id=convo_id, attachments=attachments)
@@ -3571,7 +3571,7 @@ class LauncherControlPanel(QDialog):
         lay.setContentsMargins(18, 16, 18, 16)
         lay.setSpacing(10)
 
-        title = QLabel("BRAHMA CONTROL")
+        title = QLabel("MAMAT CONTROL")
         title.setFont(QFont("Segoe UI", 13, QFont.Weight.Bold))
         title.setStyleSheet("color: #FFFFFF; background: transparent; letter-spacing: 1px;")
         lay.addWidget(title)
@@ -3613,8 +3613,8 @@ class LauncherControlPanel(QDialog):
         self._startup_btn = mk_btn("Show Workspace On Startup", checkable=True, checked=bool(startup_workspace))
         self._show_icon_btn = mk_btn("Show Floating Icon")
         self._hide_icon_btn = mk_btn("Hide Floating Icon")
-        self._restart_btn = mk_btn("Restart Brahma")
-        self._quit_btn = mk_btn("Quit Brahma")
+        self._restart_btn = mk_btn("Restart MAMAT")
+        self._quit_btn = mk_btn("Quit MAMAT")
         self._open_app_btn = mk_btn("Open App")
         self._open_dev_btn = mk_btn("Open Developer Mode")
 
@@ -3657,7 +3657,7 @@ class LauncherControlPanel(QDialog):
         flay = QVBoxLayout(frame)
         flay.setContentsMargins(18, 16, 18, 16)
         flay.setSpacing(10)
-        lbl = QLabel("Hide Brahma icon?")
+        lbl = QLabel("Hide MAMAT icon?")
         lbl.setStyleSheet("color: #FFFFFF; background: transparent; font: 700 11pt 'Segoe UI';")
         sub = QLabel("You can restore it from the system tray.")
         sub.setStyleSheet("color: rgba(255,255,255,0.65); background: transparent;")
@@ -3833,10 +3833,10 @@ class LogWidget(QScrollArea):
         tl = raw.lower()
         if tl.startswith("you:"):
             return "user", "You", raw[4:].strip()
-        if tl.startswith("brahma ai:"):
-            return "assistant", "Brahma", raw[len("Brahma AI:"):].strip()
-        if tl.startswith("brahma:"):
-            return "assistant", "Brahma", raw[len("Brahma:"):].strip()
+        if tl.startswith("mamat ai:"):
+            return "assistant", "MAMAT", raw[len("MAMAT AI:"):].strip()
+        if tl.startswith("mamat:"):
+            return "assistant", "MAMAT", raw[len("MAMAT:"):].strip()
         if tl.startswith("file:"):
             return "file", "File", raw[5:].strip()
         if tl.startswith("err:"):
@@ -3938,7 +3938,7 @@ class FileDropZone(QWidget):
 
     def _browse(self):
         path, _ = QFileDialog.getOpenFileName(
-            self, "Select a file for Brahma AI", str(Path.home()),
+            self, "Select a file for MAMAT AI", str(Path.home()),
             "All Files (*.*);;"
             "Images (*.jpg *.jpeg *.png *.gif *.webp *.bmp *.svg);;"
             "Documents (*.pdf *.docx *.txt *.md *.pptx);;"
@@ -4095,7 +4095,7 @@ class SetupOverlay(QWidget):
             return w
 
         layout.addWidget(_lbl("â—ˆ  INITIALISATION REQUIRED", 13, True))
-        layout.addWidget(_lbl("Configure Brahma before first boot.", 9, color=C.PRI_DIM))
+        layout.addWidget(_lbl("Configure MAMAT before first boot.", 9, color=C.PRI_DIM))
         layout.addSpacing(6)
 
         sep = QFrame(); sep.setFrameShape(QFrame.Shape.HLine)
@@ -4270,7 +4270,7 @@ class CommandBar(QWidget):
         lay.addWidget(_framed_logo(36, 24, bg="rgba(255,255,255,0.04)", border=C.BORDER_B, radius=18, inset=5))
 
         self._input = QLineEdit()
-        self._input.setPlaceholderText("Tell Brahma what to do...")
+        self._input.setPlaceholderText("Tell MAMAT what to do...")
         self._input.setFont(QFont("Segoe UI", 10))
         self._input.setFixedHeight(40)
         self._input.setStyleSheet(f"""
@@ -4446,7 +4446,7 @@ class DeveloperModeDialog(QDialog):
         title.setStyleSheet(f"color: {C.PRI};")
         root.addWidget(title)
 
-        desc = QLabel("Pick a workspace folder Brahma should use when building websites or other workspace-based tasks.")
+        desc = QLabel("Pick a workspace folder MAMAT should use when building websites or other workspace-based tasks.")
         desc.setWordWrap(True)
         desc.setStyleSheet(f"color: {C.TEXT_DIM};")
         root.addWidget(desc)
@@ -4526,7 +4526,7 @@ class ScanningOverlay(QWidget):
         self._splash_logo = QLabel()
         self._splash_logo.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._splash_logo.setPixmap(_logo_pixmap(160))
-        self._splash_title = QLabel("BRAHMA AI LITE")
+        self._splash_title = QLabel("MAMAT AI LITE")
         self._splash_title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._splash_title.setFont(QFont("Segoe UI", 18, QFont.Weight.Black))
         self._splash_title.setStyleSheet("color: #ffffff; letter-spacing: 2px;")
@@ -4536,12 +4536,12 @@ class ScanningOverlay(QWidget):
         self._splash_slogan = QLabel("Think. Command. Accomplish.")
         self._splash_slogan.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._splash_slogan.setStyleSheet(f"color: {C.PRI}; font-weight: 700;")
-        self._splash_status = QLabel("Initializing Brahma...")
+        self._splash_status = QLabel("Initializing MAMAT...")
         self._splash_status.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._splash_status.setStyleSheet(f"color: {C.TEXT_MED};")
 
         # Boot widgets
-        self._boot_title = QLabel("BRAHMA AI LITE")
+        self._boot_title = QLabel("MAMAT AI LITE")
         self._boot_title.setFont(QFont("Segoe UI", 20, QFont.Weight.Black))
         self._boot_title.setStyleSheet(f"color: {C.WHITE};")
         self._boot_sub = QLabel("System Boot Sequence")
@@ -4793,7 +4793,7 @@ class BootSequenceOverlay(QWidget):
     def _phase_initializing(self):
         if self._skip_requested:
             return
-        self._set_phase(1, "BRAHMA INITIALIZING...", "Brahma Core waking up.")
+        self._set_phase(1, "MAMAT INITIALIZING...", "MAMAT Core waking up.")
 
     def _phase_loading(self):
         if self._skip_requested:
@@ -4823,7 +4823,7 @@ class BootSequenceOverlay(QWidget):
             greet = "Good Afternoon"
         else:
             greet = "Good Evening"
-        self._set_phase(3, f"{greet}, {self._greeting_name}", "Brahma Lite is ready.")
+        self._set_phase(3, f"{greet}, {self._greeting_name}", "MAMAT is ready.")
 
     def _finish_sequence(self):
         if self._skip_requested:
@@ -5040,7 +5040,7 @@ class BootSequenceOverlay(QWidget):
             # central label
             p.setPen(QColor(255, 255, 255, 220))
             p.setFont(QFont("Segoe UI", int(28 * scale), QFont.Weight.Bold))
-            p.drawText(QRectF(cx - 160 * scale, cy - 40 * scale, 320 * scale, 80 * scale), Qt.AlignmentFlag.AlignCenter, "BRAHMA")
+            p.drawText(QRectF(cx - 160 * scale, cy - 40 * scale, 320 * scale, 80 * scale), Qt.AlignmentFlag.AlignCenter, "MAMAT")
 
             # phase text
             if self._phase in {1, 2, 3}:
@@ -5082,7 +5082,7 @@ class BootSequenceOverlay(QWidget):
                 p.drawText(QRectF(0, cy + 150 * scale, rect.width(), 48), Qt.AlignmentFlag.AlignCenter, self._phase_text)
                 p.setPen(QColor(220, 220, 220, 200))
                 p.setFont(QFont("Segoe UI", 14))
-                p.drawText(QRectF(0, cy + 203 * scale, rect.width(), 36), Qt.AlignmentFlag.AlignCenter, "Brahma Lite is ready.")
+                p.drawText(QRectF(0, cy + 203 * scale, rect.width(), 36), Qt.AlignmentFlag.AlignCenter, "MAMAT is ready.")
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key.Key_Escape:
@@ -5344,7 +5344,7 @@ class MeetingOverlay(QWidget):
         self._speech.setStyleSheet(f"color: {C.WHITE}; background: transparent;")
         lay.addWidget(self._speech)
 
-        self._answer = QLabel("Brahma will show the live answer here.")
+        self._answer = QLabel("MAMAT will show the live answer here.")
         self._answer.setWordWrap(True)
         self._answer.setFont(QFont("Segoe UI", 11, QFont.Weight.Bold))
         self._answer.setStyleSheet(f"color: {C.WHITE}; background: transparent;")
@@ -5470,7 +5470,7 @@ class FloatingLauncher(QWidget):
                 border: 1px solid {accent};
             }}
         """)
-        self.setToolTip(f"Brahma AI\n{self._status_line}")
+        self.setToolTip(f"MAMAT AI\n{self._status_line}")
 
     def _show_menu(self, global_pos):
         menu = QMenu(self)
@@ -5602,7 +5602,7 @@ class MainWindow(QMainWindow):
         self.setWindowFlag(Qt.WindowType.Tool, False)
         self.setWindowFlag(Qt.WindowType.Window, True)
         self.setWindowIcon(self._make_window_icon())
-        self.setWindowTitle("Brahma AI - Lite")
+        self.setWindowTitle("MAMAT AI")
         self.setMinimumSize(_MIN_W, _MIN_H)
         self.resize(_DEFAULT_W, _DEFAULT_H)
 
@@ -5914,10 +5914,10 @@ class MainWindow(QMainWindow):
                 winreg.KEY_READ | winreg.KEY_WRITE,
             ) as key:
                 try:
-                    value, _ = winreg.QueryValueEx(key, "Brahma AI - Lite")
+                    value, _ = winreg.QueryValueEx(key, "MAMAT AI")
                     run_value = _startup_run_value()
                     if value != run_value:
-                        winreg.SetValueEx(key, "Brahma AI - Lite", 0, winreg.REG_SZ, run_value)
+                        winreg.SetValueEx(key, "MAMAT AI", 0, winreg.REG_SZ, run_value)
                     return bool(value)
                 except FileNotFoundError:
                     return False
@@ -5931,10 +5931,10 @@ class MainWindow(QMainWindow):
         try:
             with winreg.CreateKey(winreg.HKEY_CURRENT_USER, _startup_registry_key()) as key:
                 if enabled:
-                    winreg.SetValueEx(key, "Brahma AI - Lite", 0, winreg.REG_SZ, run_value)
+                    winreg.SetValueEx(key, "MAMAT AI", 0, winreg.REG_SZ, run_value)
                 else:
                     try:
-                        winreg.DeleteValue(key, "Brahma AI - Lite")
+                        winreg.DeleteValue(key, "MAMAT AI")
                     except FileNotFoundError:
                         pass
             return True
@@ -6144,11 +6144,11 @@ class MainWindow(QMainWindow):
             l.setStyleSheet(f"color: {color}; background: transparent;")
             return l
 
-        lay.addWidget(_badge("BRAHMA AI - LITE", C.PRI_DIM))
+        lay.addWidget(_badge("MAMAT AI", C.PRI_DIM))
         lay.addStretch()
 
         mid = QVBoxLayout(); mid.setSpacing(1)
-        title = QLabel("BRAHMA AI")
+        title = QLabel("MAMAT AI")
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         title.setFont(QFont("Courier New", 17, QFont.Weight.Bold))
         title.setStyleSheet(f"color: {C.PRI}; background: transparent;")
@@ -6193,7 +6193,7 @@ class MainWindow(QMainWindow):
         if hasattr(self, "_core_sub_lbl") and self._core_sub_lbl is not None:
             self._core_sub_lbl.setText("Ready to assist.")
         if hasattr(self, "_core_status_lbl") and self._core_status_lbl is not None:
-            self._core_status_lbl.setText("Brahma is ready. Gemini 2.5 Flash · OpenRouter · Voice Connected · Memory Enabled")
+            self._core_status_lbl.setText("MAMAT is ready. Gemini 2.5 Flash · OpenRouter · Voice Connected · Memory Enabled")
         if hasattr(self, "_cpu_lbl") and self._cpu_lbl is not None:
             self._cpu_lbl.setText(f"CPU {int(psutil.cpu_percent(interval=None))}%")
         if hasattr(self, "_ram_lbl") and self._ram_lbl is not None:
@@ -6381,7 +6381,7 @@ class MainWindow(QMainWindow):
 
         lay.addWidget(_fl("[F4] Mute  Â·  [F11] Fullscreen"))
         lay.addStretch()
-        lay.addWidget(_fl("Suryaansh Tiwari  Â·  Brahma AI - Lite  Â·  Open Source"))
+        lay.addWidget(_fl("Suryaansh Tiwari  Â·  MAMAT AI  Â·  Open Source"))
         lay.addStretch()
         lay.addWidget(_fl("Â© STARK INDUSTRIES", C.PRI_DIM))
         return w
@@ -6406,7 +6406,7 @@ class MainWindow(QMainWindow):
 
     def _browse_attachment(self):
         path, _ = QFileDialog.getOpenFileName(
-            self, "Attach a file to Brahma", str(Path.home()),
+            self, "Attach a file to MAMAT", str(Path.home()),
             "All Files (*.*);;"
             "Images (*.jpg *.jpeg *.png *.gif *.webp *.bmp *.svg);;"
             "Documents (*.pdf *.docx *.txt *.md *.pptx);;"
@@ -6503,7 +6503,7 @@ class MainWindow(QMainWindow):
                     self.on_chat_event({"role": "user", "text": user_msg, "source": source})
                 except Exception:
                     pass
-        if hasattr(self, "_result_card") and low.startswith("brahma ai:"):
+        if hasattr(self, "_result_card") and low.startswith("mamat ai:"):
             reply = raw.split(":", 1)[1].strip()
             self._result_card.set_body(reply[:80] + ("…" if len(reply) > 80 else ""))
             self._result_card.show()
@@ -6625,7 +6625,7 @@ class MainWindow(QMainWindow):
     def notify_phone_connected(self):
         if self._remote_overlay is not None:
             self._remote_overlay.mark_connected()
-        self._log_sig.emit("SYS: Phone connected to Brahma remote.")
+        self._log_sig.emit("SYS: Phone connected to MAMAT remote.")
 
     def changeEvent(self, event):
         super().changeEvent(event)
@@ -6660,13 +6660,13 @@ class MainWindow(QMainWindow):
             )
         if hasattr(self, "_task_card"):
             if state == "THINKING":
-                self._task_card.set_task("Working on it...", "Brahma is processing your request.", 72)
+                self._task_card.set_task("Working on it...", "MAMAT is processing your request.", 72)
             elif state == "SPEAKING":
-                self._task_card.set_task("Responding...", "Brahma is speaking now.", 100)
+                self._task_card.set_task("Responding...", "MAMAT is speaking now.", 100)
             elif state == "MUTED":
                 self._task_card.set_task("Microphone muted", "Voice input is paused.", 0)
             else:
-                self._task_card.set_task("Ready", "Brahma is idle and ready.", 0)
+                self._task_card.set_task("Ready", "MAMAT is idle and ready.", 0)
         if hasattr(self, "_result_card"):
             if state == "THINKING":
                 self._result_card.set_body("Action pending")
@@ -6880,7 +6880,7 @@ class MainWindow(QMainWindow):
                 self._overlay.deleteLater()
                 self._overlay = None
             self._apply_state("LISTENING")
-            self._log.append_log(f"SYS: Initialised. OS={os_name.upper()}. Brahma AI online.")
+            self._log.append_log(f"SYS: Initialised. OS={os_name.upper()}. MAMAT AI online.")
         except Exception as e:
             self._log.append_log(f"ERR: setup failed: {e}")
             traceback.print_exc()
@@ -7036,7 +7036,7 @@ class MainWindow(QMainWindow):
         brand_lay.addWidget(_framed_logo(62, 44, bg="rgba(9,10,14,245)", border=C.BORDER_B, radius=10, inset=8))
         brand_text = QVBoxLayout()
         brand_text.setSpacing(2)
-        title = QLabel("<span style='color:#ff4545;'>BRAHMA</span><br><span style='color:#ffffff;'>LITE</span>")
+        title = QLabel("<span style='color:#ff4545;'>MAMAT</span><br><span style='color:#ffffff;'>LITE</span>")
         title.setFont(QFont("Segoe UI", 16, QFont.Weight.Bold))
         title.setStyleSheet("background: transparent;")
         sub = QLabel("Your AI Assistant")
@@ -7049,7 +7049,7 @@ class MainWindow(QMainWindow):
 
         lay.addWidget(section("Workspace"))
         self._nav_items["dashboard"] = NavItem("Dashboard", active=True, letter="[]")
-        self._nav_items["home"] = NavItem("Brahma Home", active=False, letter="H")
+        self._nav_items["home"] = NavItem("MAMAT Home", active=False, letter="H")
         self._nav_items["settings"] = NavItem("System & Connect", letter="S")
         self._nav_items["dashboard"].clicked.connect(lambda: activate("dashboard"))
         self._nav_items["home"].clicked.connect(lambda: activate("home"))
@@ -7085,7 +7085,7 @@ class MainWindow(QMainWindow):
         status_lay.setSpacing(5)
         online = QLabel("<span style='color:#37ff5f;'>●</span> <span style='color:#a9ffb9; font-weight:700;'>System Online</span>")
         online.setFont(QFont("Segoe UI", 8, QFont.Weight.Bold))
-        name = QLabel("Brahma AI - Lite")
+        name = QLabel("MAMAT AI")
         name.setFont(QFont("Segoe UI", 9))
         name.setStyleSheet(f"color: {C.TEXT_MED};")
         ver = QLabel("Version 1.0.0 • Gemini 2.5 Flash")
@@ -7125,7 +7125,7 @@ class MainWindow(QMainWindow):
         self._core_sub_lbl = QLabel("Ready to assist.")
         self._core_sub_lbl.setFont(QFont("Segoe UI", 9))
         self._core_sub_lbl.setStyleSheet(f"color: {C.TEXT_DIM}; background: transparent;")
-        self._core_status_lbl = QLabel("Brahma is ready. Gemini 2.5 Flash · OpenRouter · Voice Connected · Memory Enabled")
+        self._core_status_lbl = QLabel("MAMAT is ready. Gemini 2.5 Flash · OpenRouter · Voice Connected · Memory Enabled")
         self._core_status_lbl.setWordWrap(True)
         self._core_status_lbl.setFont(QFont("Segoe UI", 8))
         self._core_status_lbl.setStyleSheet(f"color: #9da8b7; background: transparent;")
@@ -7280,7 +7280,7 @@ class MainWindow(QMainWindow):
         cmd_lay.setSpacing(10)
         cmd_lay.addLayout(self._build_command_row())
         stage.addWidget(self._command_panel)
-        self._home_page = BrahmaHomePage()
+        self._home_page = MAMATHomePage()
         self._center_stack = QStackedWidget()
         self._center_stack.setStyleSheet("background: transparent; border: none;")
         self._center_stack.addWidget(w)
@@ -7365,7 +7365,7 @@ class MainWindow(QMainWindow):
         row.setSpacing(12)
 
         self._input = QLineEdit()
-        self._input.setPlaceholderText("Ask Brahma anything...")
+        self._input.setPlaceholderText("Ask MAMAT anything...")
         self._input.setFont(QFont("Segoe UI", 10))
         self._input.setFixedHeight(50)
         self._input.setStyleSheet(f"""
@@ -7527,7 +7527,7 @@ class SystemConnectivitySidebar(QFrame):
         self._quick_actions = QVBoxLayout()
         self._quick_actions.setSpacing(10)
         lay.addLayout(self._quick_actions)
-        self._mk_quick_action("↻ Restart Brahma AI", QStyle.StandardPixmap.SP_BrowserReload, self._restart)
+        self._mk_quick_action("↻ Restart MAMAT AI", QStyle.StandardPixmap.SP_BrowserReload, self._restart)
         self._mk_quick_action("⟳ Reload Configuration", QStyle.StandardPixmap.SP_BrowserReload, self._reload)
         self._mk_quick_action("📁 Open Data Folder", QStyle.StandardPixmap.SP_DirOpenIcon, self._open_data_folder)
         self._mk_quick_action("📄 View Logs", QStyle.StandardPixmap.SP_FileDialogDetailedView, self._view_logs)
@@ -7826,7 +7826,7 @@ class SystemConnectivityPage(QWidget):
         lay.addWidget(card)
 
         # Mobile connect
-        mobile = self._card("Mobile Connect", "Connect your phone and control Brahma remotely.")
+        mobile = self._card("Mobile Connect", "Connect your phone and control MAMAT remotely.")
         ml = mobile.layout()
         self._mobile_status = QLabel("Connection Status: Ready")
         self._mobile_phone = QLabel("Phone Name: Not connected")
@@ -7865,9 +7865,9 @@ class SystemConnectivityPage(QWidget):
         lay.addWidget(attention)
 
         # Startup
-        startup = self._card("Startup", "Use Brahma with Windows startup preferences.")
+        startup = self._card("Startup", "Use MAMAT with Windows startup preferences.")
         sl = startup.layout()
-        self._startup_launch_btn = self._mk_toggle("Launch Brahma AI when Windows starts", bool(self._load_app_settings().get("show_workspace_on_startup", False)), self._toggle_startup_from_page)
+        self._startup_launch_btn = self._mk_toggle("Launch MAMAT AI when Windows starts", bool(self._load_app_settings().get("show_workspace_on_startup", False)), self._toggle_startup_from_page)
         self._startup_minimized_btn = self._mk_toggle("Launch Minimized", bool(self._load_app_settings().get("launch_minimized", False)), self._toggle_launch_minimized)
         self._startup_updates_btn = self._mk_toggle("Check for updates on startup", bool(self._load_app_settings().get("check_updates_on_startup", True)), self._toggle_update_check)
         sl.addWidget(self._startup_launch_btn)
@@ -7876,7 +7876,7 @@ class SystemConnectivityPage(QWidget):
         lay.addWidget(startup)
 
         # Shortcuts & Pinning
-        shortcuts = self._card("Shortcuts & Pinning", "Create shortcuts and pin Brahma to your Windows system.")
+        shortcuts = self._card("Shortcuts & Pinning", "Create shortcuts and pin MAMAT to your Windows system.")
         shl = shortcuts.layout()
 
         btn_row = QHBoxLayout()
@@ -7917,7 +7917,7 @@ class SystemConnectivityPage(QWidget):
         lay.addWidget(anim)
 
         # Discord bot
-        discord = self._card("Discord Bot", "Mirror Brahma between the app and your server.")
+        discord = self._card("Discord Bot", "Mirror MAMAT between the app and your server.")
         dl = discord.layout()
         self._discord_defaults = self._load_discord_settings()
         self._discord_status = QLabel("Bot Status: Offline")
@@ -7952,7 +7952,7 @@ class SystemConnectivityPage(QWidget):
         dl.addWidget(self._discord_msg)
         lay.addWidget(discord)
 
-        about = self._card("About Brahma", "Brahma AI Lite information only.")
+        about = self._card("About MAMAT", "MAMAT AI Lite information only.")
         ab = about.layout()
         about_grid = QGridLayout()
         about_grid.setHorizontalSpacing(22)
@@ -8011,7 +8011,7 @@ class SystemConnectivityPage(QWidget):
         box = self._card("Quick Actions", "")
         lay = box.layout()
         actions = [
-            ("Restart Brahma AI", QStyle.StandardPixmap.SP_BrowserReload, self._restart_app),
+            ("Restart MAMAT AI", QStyle.StandardPixmap.SP_BrowserReload, self._restart_app),
             ("Reload Configuration", QStyle.StandardPixmap.SP_BrowserReload, self._reload_config),
             ("Open Data Folder", QStyle.StandardPixmap.SP_DirOpenIcon, self._open_data_folder),
             ("View Logs", QStyle.StandardPixmap.SP_FileDialogDetailedView, self._view_logs),
@@ -8189,7 +8189,7 @@ class SystemConnectivityPage(QWidget):
             self._ctrl()._win._start_discord_bot()
             self._ctrl()._win._stop_discord_bot()
             self._discord_status.setText("Bot Status: Test sent")
-            self._discord_msg.setText("Connected as Brahma#9649" if self._discord_token.text().strip() else "Bot Offline")
+            self._discord_msg.setText("Connected as MAMAT#9649" if self._discord_token.text().strip() else "Bot Offline")
 
     def _restart_discord_from_page(self):
         if self._ctrl() and hasattr(self._ctrl(), "_win"):
@@ -8279,7 +8279,7 @@ class SystemConnectivityPage(QWidget):
         token = (discord.get("bot_token") or "").strip()
         if enabled and token:
             self._discord_status.setText("Bot Status: Online")
-            self._discord_msg.setText("Connected as Brahma#9649")
+            self._discord_msg.setText("Connected as MAMAT#9649")
         elif token:
             self._discord_status.setText("Bot Status: Offline")
             self._discord_msg.setText("Bot Offline")
@@ -8334,12 +8334,12 @@ class SystemConnectivityPage(QWidget):
                 desktop_dir = Path(os.path.expanduser("~")) / "Desktop"
 
             desktop_dir.mkdir(parents=True, exist_ok=True)
-            shortcut_path = desktop_dir / "Brahma Ai - Premium.lnk"
+            shortcut_path = desktop_dir / "MAMAT Ai - Premium.lnk"
 
             # Base variables
             base_dir = Path(os.path.abspath("."))
             script_path = base_dir / "main.py"
-            icon_path = base_dir / "assets" / "Brahma_Lite_Logo.ico"
+            icon_path = base_dir / "assets" / "MAMAT_Logo.ico"
 
             python_exe = sys.executable
             if not python_exe:
@@ -8364,7 +8364,7 @@ class SystemConnectivityPage(QWidget):
                 f"$Shortcut.Arguments = '{_ps_escape(shortcut_args)}'",
                 f"$Shortcut.WorkingDirectory = '{_ps_escape(str(base_dir))}'",
                 "$Shortcut.WindowStyle = 7",
-                "$Shortcut.Description = 'Launch Brahma Ai - Premium'",
+                "$Shortcut.Description = 'Launch MAMAT Ai - Premium'",
                 f"if ('{_ps_escape(icon_value)}') {{ $Shortcut.IconLocation = '{_ps_escape(icon_value)},0' }}",
                 "$Shortcut.Save()",
             ])
@@ -8424,9 +8424,9 @@ class SystemConnectivityPage(QWidget):
             )
 
             if res.returncode == 0:
-                return True, "Brahma AI has been pinned to your Taskbar!"
+                return True, "MAMAT AI has been pinned to your Taskbar!"
             else:
-                return False, "Windows restricts programmatic taskbar pinning. Please right-click the 'Brahma Ai - Premium.lnk' shortcut on your Desktop and select 'Pin to taskbar', or drag it directly onto your taskbar."
+                return False, "Windows restricts programmatic taskbar pinning. Please right-click the 'MAMAT Ai - Premium.lnk' shortcut on your Desktop and select 'Pin to taskbar', or drag it directly onto your taskbar."
         except Exception as e:
             return False, f"Error pinning to taskbar: {e}"
 
@@ -8510,7 +8510,7 @@ class SmartDevicesSection(QFrame):
                 background: rgba(255,69,69,0.16);
             }}
         """)
-        self._open_home_btn.clicked.connect(self._open_brahma_home)
+        self._open_home_btn.clicked.connect(self._open_mamat_home)
         header.addWidget(self._open_home_btn)
         root.addLayout(header)
 
@@ -8528,7 +8528,7 @@ class SmartDevicesSection(QFrame):
         empty_desc.setAlignment(Qt.AlignmentFlag.AlignCenter)
         empty_desc.setFont(QFont("Segoe UI", 8))
         empty_desc.setStyleSheet(f"color: {C.TEXT_DIM};")
-        empty_btn = QPushButton("Open Brahma Home")
+        empty_btn = QPushButton("Open MAMAT Home")
         empty_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         empty_btn.setFixedWidth(160)
         empty_btn.setStyleSheet(f"""
@@ -8543,7 +8543,7 @@ class SmartDevicesSection(QFrame):
                 background: rgba(255,69,69,0.18);
             }}
         """)
-        empty_btn.clicked.connect(self._open_brahma_home)
+        empty_btn.clicked.connect(self._open_mamat_home)
         empty_lay.addStretch(1)
         empty_lay.addWidget(empty_title)
         empty_lay.addWidget(empty_desc)
@@ -8654,7 +8654,7 @@ class SmartDevicesSection(QFrame):
     def _controller_bridge(self):
         return self._controller
 
-    def _open_brahma_home(self):
+    def _open_mamat_home(self):
         bridge = self._controller_bridge()
         if bridge and hasattr(bridge, "_set_page"):
             bridge._set_page("home")
@@ -8945,12 +8945,12 @@ class _RootShim:
         pass
 
 
-class BrahmaUI:
+class MAMATUI:
     def __init__(self, face_path: str, size=None, *, show_immediately: bool = True):
         self._app = QApplication.instance() or QApplication(sys.argv)
         self._app.setStyle("Fusion")
         self._app.setQuitOnLastWindowClosed(False)
-        self._app.setApplicationDisplayName("Brahma AI - Lite")
+        self._app.setApplicationDisplayName("MAMAT AI")
         self._app.setWindowIcon(self._make_app_icon())
         try:
             current_store = workspace_store()
@@ -8991,7 +8991,7 @@ class BrahmaUI:
         self._win.minimized.connect(self._on_minimized)
         self._win._state_sig.connect(self._sync_launcher_state)
         self._tray = QSystemTrayIcon(self._make_app_icon(), self._app)
-        self._tray.setToolTip("Brahma AI - Lite")
+        self._tray.setToolTip("MAMAT AI")
         self._tray.activated.connect(self._on_tray_activated)
         self._tray.setContextMenu(self._build_tray_menu())
         self._tray.show()

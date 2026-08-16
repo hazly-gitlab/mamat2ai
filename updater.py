@@ -11,9 +11,9 @@ import zipfile
 from pathlib import Path
 from typing import Callable, Optional
 
-GITHUB_REPO_URL = "https://github.com/titechprabhasolutions/Brahma-AI---Lite"
-GITHUB_API_URL = "https://api.github.com/repos/titechprabhasolutions/Brahma-AI---Lite/commits/main"
-GITHUB_ZIP_URL = "https://github.com/titechprabhasolutions/Brahma-AI---Lite/archive/refs/heads/main.zip"
+GITHUB_REPO_URL = "https://github.com/titechprabhasolutions/MAMAT-AI---Lite"
+GITHUB_API_URL = "https://api.github.com/repos/titechprabhasolutions/MAMAT-AI---Lite/commits/main"
+GITHUB_ZIP_URL = "https://github.com/titechprabhasolutions/MAMAT-AI---Lite/archive/refs/heads/main.zip"
 
 
 class AutoUpdater:
@@ -67,7 +67,7 @@ class AutoUpdater:
             GITHUB_API_URL,
             headers={
                 "Accept": "application/vnd.github+json",
-                "User-Agent": "BrahmaAI-Updater",
+                "User-Agent": "MAMATAI-Updater",
             },
         )
         with urllib.request.urlopen(req, timeout=15) as response:
@@ -75,7 +75,7 @@ class AutoUpdater:
             return payload.get("sha")
 
     def should_update(self) -> bool:
-        if os.environ.get("BRAHMA_SKIP_UPDATE", "").lower() in {"1", "true", "yes"}:
+        if os.environ.get("MAMAT_SKIP_UPDATE", "").lower() in {"1", "true", "yes"}:
             self._log("update check skipped by environment")
             return False
 
@@ -98,7 +98,7 @@ class AutoUpdater:
 
         self._log(f"updating from {GITHUB_REPO_URL}")
         try:
-            with tempfile.TemporaryDirectory(prefix="brahma-update-", dir=str(self.base_dir)) as temp_dir:
+            with tempfile.TemporaryDirectory(prefix="mamat-update-", dir=str(self.base_dir)) as temp_dir:
                 archive_path = Path(temp_dir) / "repo.zip"
                 self._log("downloading latest source snapshot")
                 urllib.request.urlretrieve(GITHUB_ZIP_URL, archive_path)
@@ -109,7 +109,7 @@ class AutoUpdater:
                 extracted_root = Path(temp_dir)
                 repo_dir = None
                 for candidate in extracted_root.iterdir():
-                    if candidate.is_dir() and candidate.name.startswith("Brahma-AI---Lite"):
+                    if candidate.is_dir() and candidate.name.startswith("MAMAT-AI---Lite"):
                         repo_dir = candidate
                         break
 

@@ -1,1 +1,1 @@
-"""Authentication helpers for Brahma AI - Lite."""
+"""Authentication helpers for MAMAT AI."""

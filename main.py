@@ -21,7 +21,7 @@ except Exception:
 import sounddevice as sd
 from google import genai
 from google.genai import types
-from ui import BrahmaUI
+from ui import MAMATUI
 from memory.memory_manager import (
     load_memory, update_memory, format_memory_for_prompt,
     should_extract_memory, extract_memory
@@ -70,7 +70,7 @@ def get_base_dir():
 BASE_DIR        = get_base_dir()
 API_CONFIG_PATH = BASE_DIR / "config" / "api_keys.json"
 PROMPT_PATH     = BASE_DIR / "core" / "prompt.txt"
-STARTUP_LOG     = Path(os.environ.get("LOCALAPPDATA", str(BASE_DIR))) / "BrahmaAI" / "startup.log"
+STARTUP_LOG     = Path(os.environ.get("LOCALAPPDATA", str(BASE_DIR))) / "MAMATAI" / "startup.log"
 LIVE_MODEL          = "models/gemini-2.5-flash-native-audio-preview-12-2025"
 CHANNELS            = 1
 SEND_SAMPLE_RATE    = 16000
@@ -118,9 +118,9 @@ def _ensure_desktop_shortcut() -> None:
             desktop_dir = Path(os.path.expanduser("~")) / "Desktop"
 
         desktop_dir.mkdir(parents=True, exist_ok=True)
-        shortcut_path = desktop_dir / "Brahma AI - Lite.lnk"
+        shortcut_path = desktop_dir / "MAMAT AI.lnk"
         script_path = BASE_DIR / "main.py"
-        icon_path = BASE_DIR / "assets" / "Brahma_Lite_Logo.ico"
+        icon_path = BASE_DIR / "assets" / "MAMAT_Logo.ico"
 
         if not icon_path.exists():
             icon_path = None
@@ -151,7 +151,7 @@ def _ensure_desktop_shortcut() -> None:
             f"$Shortcut.Arguments = '{_ps_escape(shortcut_args)}'",
             f"$Shortcut.WorkingDirectory = '{_ps_escape(str(BASE_DIR))}'",
             "$Shortcut.WindowStyle = 7",
-            "$Shortcut.Description = 'Launch Brahma AI - Lite'",
+            "$Shortcut.Description = 'Launch MAMAT AI'",
             f"if ('{_ps_escape(icon_value)}') {{ $Shortcut.IconLocation = '{_ps_escape(icon_value)},0' }}",
             "$Shortcut.Save()",
         ])
@@ -174,7 +174,7 @@ def _load_system_prompt() -> str:
         return PROMPT_PATH.read_text(encoding="utf-8")
     except Exception:
         return (
-            "You are Brahma AI - Lite, a calm, direct, and professional AI assistant. "
+            "You are MAMAT AI, a calm, direct, and professional AI assistant. "
             "Be concise, direct, and always use the provided tools to complete tasks. "
             "Never simulate or guess results — always call the appropriate tool. "
             "If the user asks to create, build, launch, or open a website, always use the selected workspace folder."
@@ -230,7 +230,7 @@ def _gemini_text_reply(prompt: str) -> str:
         http_options={"api_version": "v1beta"},
     )
     system_prompt = (
-        "You are Brahma AI - Lite, a concise, helpful desktop assistant. "
+        "You are MAMAT AI, a concise, helpful desktop assistant. "
         "Reply naturally and briefly. Do not mention internal implementation details."
     )
     response = client.models.generate_content(
@@ -315,10 +315,10 @@ def _wakeword_detected(text: str) -> bool:
     if not words:
         return False
     phrases = (
-        "brahma",
-        "hey brahma",
-        "hi brahma",
-        "hello brahma",
+        "mamat",
+        "hey mamat",
+        "hi mamat",
+        "hello mamat",
         "hey",
         "hi",
         "hello",
@@ -326,7 +326,7 @@ def _wakeword_detected(text: str) -> bool:
     compact = " ".join(words)
     if compact in phrases or any(p in compact for p in phrases):
         return True
-    return any(word in {"brahma", "hey", "hi", "hello"} for word in words)
+    return any(word in {"mamat", "hey", "hi", "hello"} for word in words)
 
 
 def _build_task_plan(text: str) -> list[str]:
@@ -390,11 +390,11 @@ def _build_task_plan(text: str) -> list[str]:
 
 _last_memory_input = ""
 
-def _update_memory_async(user_text: str, brahma_text: str) -> None:
+def _update_memory_async(user_text: str, mamat_text: str) -> None:
     global _last_memory_input
 
     user_text   = (user_text   or "").strip()
-    brahma_text = (brahma_text or "").strip()
+    mamat_text = (mamat_text or "").strip()
 
     if len(user_text) < 5 or user_text == _last_memory_input:
         return
@@ -402,9 +402,9 @@ def _update_memory_async(user_text: str, brahma_text: str) -> None:
 
     try:
         api_key = _get_api_key()
-        if not should_extract_memory(user_text, brahma_text, api_key):
+        if not should_extract_memory(user_text, mamat_text, api_key):
             return
-        data = extract_memory(user_text, brahma_text, api_key)
+        data = extract_memory(user_text, mamat_text, api_key)
         if data:
             update_memory(data)
             print(f"[Memory] ✅ {list(data.keys())}")
@@ -771,7 +771,7 @@ TOOL_DECLARATIONS = [
         "name": "presentation_builder",
         "description": (
             "Creates editable PowerPoint presentations (.pptx) from a structured slide outline. "
-            "Brahma automatically infers the best visual style from the topic, searches for a matching online template when available, "
+            "MAMAT automatically infers the best visual style from the topic, searches for a matching online template when available, "
             "reuses cached templates, and falls back to the built-in designer if no suitable template is found. "
             "Use when the user asks for a deck, slideshow, presentation, pitch deck, or report slides."
         ),
@@ -782,7 +782,7 @@ TOOL_DECLARATIONS = [
                 "subtitle": {"type": "STRING", "description": "Optional subtitle or audience line"},
                 "theme": {
                     "type": "STRING",
-                    "description": "Optional presentation theme or visual direction such as neon, corporate, luxury, academic, sunset, or creative. If omitted, Brahma infers the best style automatically."
+                    "description": "Optional presentation theme or visual direction such as neon, corporate, luxury, academic, sunset, or creative. If omitted, MAMAT infers the best style automatically."
                 },
                 "outline": {
                     "type": "STRING",
@@ -938,11 +938,11 @@ TOOL_DECLARATIONS = [
         }
     },
     {
-        "name": "shutdown_brahma",
+        "name": "shutdown_mamat",
         "description": (
             "Shuts down the assistant completely. "
         "Call this when the user expresses intent to end the conversation, "
-        "close the assistant, say goodbye, or stop Brahma AI. "
+        "close the assistant, say goodbye, or stop MAMAT AI. "
         "The user can say this in ANY language."
     ),
     "parameters": {
@@ -983,9 +983,9 @@ TOOL_DECLARATIONS = [
 ]
 
 
-class BrahmaLive:
+class MAMATLive:
 
-    def __init__(self, ui: BrahmaUI, dashboard=None, dashboard_started: bool = False, enable_dashboard: bool = True):
+    def __init__(self, ui: MAMATUI, dashboard=None, dashboard_started: bool = False, enable_dashboard: bool = True):
         self.ui             = ui
         self._smart_home    = SmartHomeService()
         self.session        = None
@@ -1097,10 +1097,10 @@ class BrahmaLive:
             devices = self._smart_home.list_devices()
             routed_text_home = sd_mgr.route_command(text, devices)
             if routed_text_home != text:
-                print(f"[BRAHMA] Redirection: '{text}' -> '{routed_text_home}'")
+                print(f"[MAMAT] Redirection: '{text}' -> '{routed_text_home}'")
                 text = routed_text_home
         except Exception as e:
-            print(f"[BRAHMA] Redirection error: {e}")
+            print(f"[MAMAT] Redirection error: {e}")
 
         developer_settings = self.ui._load_app_settings() if hasattr(self.ui, "_load_app_settings") else {}
         developer_enabled = bool(developer_settings.get("developer_mode_enabled", False))
@@ -1151,7 +1151,7 @@ class BrahmaLive:
             try:
                 self.ui.update_task_workspace(
                     status="Scanning screen",
-                    output="Brahma is inspecting the screen for what you asked about.",
+                    output="MAMAT is inspecting the screen for what you asked about.",
                     percent=40,
                 )
             except Exception:
@@ -1204,7 +1204,7 @@ class BrahmaLive:
                 percent=100,
                 source=source,
             )
-            self.ui.write_log(f"Brahma AI: {detail}")
+            self.ui.write_log(f"MAMAT AI: {detail}")
             self.speak(detail)
             if not self.ui.muted:
                 self.ui.set_state("LISTENING")
@@ -1313,7 +1313,7 @@ class BrahmaLive:
         if summary:
             self.ui.write_log(f"[Meeting] {summary}")
         if answer:
-            self.ui.write_log(f"Brahma AI: {answer}")
+            self.ui.write_log(f"MAMAT AI: {answer}")
 
     def _on_meeting_state(self, state: str):
         if state == "LISTENING":
@@ -1459,7 +1459,7 @@ class BrahmaLive:
                 return self._prompt_message_reply(event)
             if self._attention_matches(lower, ("hear", "read", "what is it", "tell me", "show it", "open it")):
                 preview = read_event_preview(event)
-                self.ui.write_log(f"Brahma AI: {preview}")
+                self.ui.write_log(f"MAMAT AI: {preview}")
                 threading.Thread(target=speak_native, args=(preview,), daemon=True).start()
                 with self._attention_lock:
                     self._pending_attention = None
@@ -1509,7 +1509,7 @@ class BrahmaLive:
         if kind == "message":
             if decision == "hear":
                 preview = read_event_preview(event)
-                self.ui.write_log(f"Brahma AI: {preview}")
+                self.ui.write_log(f"MAMAT AI: {preview}")
                 threading.Thread(target=speak_native, args=(preview,), daemon=True).start()
             elif decision == "reply":
                 self._prompt_message_reply(event)
@@ -1541,7 +1541,7 @@ class BrahmaLive:
             try:
                 self.ui.update_task_workspace(
                     status="Thinking",
-                    output="Brahma is drafting a direct reply.",
+                    output="MAMAT is drafting a direct reply.",
                     percent=35,
                 )
             except Exception:
@@ -1554,7 +1554,7 @@ class BrahmaLive:
                 try:
                     reply = _gemini_text_reply(request_text)
                 except Exception as e:
-                    print(f"[BRAHMA] ⚠️ Gemini fallback failed: {e}")
+                    print(f"[MAMAT] ⚠️ Gemini fallback failed: {e}")
                     if _is_gemini_limit_error(e):
                         self._use_openrouter_first = True
 
@@ -1563,18 +1563,18 @@ class BrahmaLive:
                     reply = openrouter_client.chat(
                         request_text,
                         system=(
-                            "You are Brahma AI - Lite, a concise, helpful desktop assistant. "
+                            "You are MAMAT AI, a concise, helpful desktop assistant. "
                             "Reply naturally and briefly. Do not mention internal implementation details."
                         ),
                     )
                 except Exception as e:
-                    print(f"[BRAHMA] ⚠️ OpenRouter fallback failed: {e}")
+                    print(f"[MAMAT] ⚠️ OpenRouter fallback failed: {e}")
                     if gemini_first and not self._use_openrouter_first and _is_gemini_limit_error(e):
                         self._use_openrouter_first = True
             reply = (reply or "").strip()
             if not reply:
                 reply = "I’m ready, sir."
-            self.ui.write_log(f"Brahma AI: {reply}")
+            self.ui.write_log(f"MAMAT AI: {reply}")
             try:
                 self.ui.finish_task_workspace(reply, "Reply delivered.", 100)
             except Exception:
@@ -1583,7 +1583,7 @@ class BrahmaLive:
                 self.ui.set_state("LISTENING")
         except Exception as e:
             msg = f"Fallback reply failed: {e}"
-            print(f"[BRAHMA] ⚠️ {msg}")
+            print(f"[MAMAT] ⚠️ {msg}")
             self.ui.write_log(f"ERR: {msg}")
             try:
                 self.ui.finish_task_workspace(msg, "Reply failed.", 100)
@@ -1636,7 +1636,7 @@ class BrahmaLive:
             parts.append(mem_str)
         parts.append(sys_prompt)
         parts.append(
-            "Wake-word mode: if the microphone is muted, still listen for the words 'Brahma', 'hey', 'hi', and 'hello'. "
+            "Wake-word mode: if the microphone is muted, still listen for the words 'MAMAT', 'hey', 'hi', and 'hello'. "
             "When you hear one of these activation cues, keep the session friendly and concise, "
             "and wait for the user's next command."
         )
@@ -1661,7 +1661,7 @@ class BrahmaLive:
         name = fc.name
         args = dict(fc.args or {})
 
-        print(f"[BRAHMA] 🔧 {name}  {args}")
+        print(f"[MAMAT] 🔧 {name}  {args}")
         self.ui.set_state("THINKING")
         try:
             self.ui.update_task_workspace(
@@ -1807,7 +1807,7 @@ class BrahmaLive:
             elif name == "flight_finder":
                 r = await loop.run_in_executor(None, lambda: flight_finder(parameters=args, player=self.ui))
                 result = r or "Done."
-            elif name == "shutdown_brahma":
+            elif name == "shutdown_mamat":
                 self.ui.write_log("SYS: Shutdown requested.")
                 self.speak("Goodbye, sir.")
 
@@ -1833,7 +1833,7 @@ class BrahmaLive:
         if not self.ui.muted:
             self.ui.set_state("LISTENING")
 
-        print(f"[BRAHMA] 📤 {name} → {str(result)[:80]}")
+        print(f"[MAMAT] 📤 {name} → {str(result)[:80]}")
 
         return types.FunctionResponse(
             id=fc.id, name=name,
@@ -1884,15 +1884,15 @@ class BrahmaLive:
             await self.session.send_realtime_input(media=msg)
 
     async def _listen_audio(self):
-        print("[BRAHMA] 🎤 Mic started")
+        print("[MAMAT] 🎤 Mic started")
         loop = asyncio.get_event_loop()
 
         def callback(indata, frames, time_info, status):
             with self._speaking_lock:
-                brahma_speaking = self._is_speaking
+                mamat_speaking = self._is_speaking
             if self._phone_active:
                 return
-            if not brahma_speaking and (not self.ui.muted or getattr(self.ui, "_wakeword_listening", False)):
+            if not mamat_speaking and (not self.ui.muted or getattr(self.ui, "_wakeword_listening", False)):
                 data = indata.tobytes()
                 loop.call_soon_threadsafe(
                     self.out_queue.put_nowait,
@@ -1907,15 +1907,15 @@ class BrahmaLive:
                 blocksize=CHUNK_SIZE,
                 callback=callback,
             ):
-                print("[BRAHMA] 🎤 Mic stream open")
+                print("[MAMAT] 🎤 Mic stream open")
                 while True:
                     await asyncio.sleep(0.1)
         except Exception as e:
-            print(f"[BRAHMA] ❌ Mic: {e}")
+            print(f"[MAMAT] ❌ Mic: {e}")
             raise
 
     async def _receive_audio(self):
-        print("[BRAHMA] 👂 Recv started")
+        print("[MAMAT] 👂 Recv started")
         out_buf, in_buf = [], []
 
         try:
@@ -1960,7 +1960,7 @@ class BrahmaLive:
 
                             full_out = " ".join(out_buf).strip()
                             if full_out:
-                                self.ui.write_log(f"Brahma AI: {full_out}")
+                                self.ui.write_log(f"MAMAT AI: {full_out}")
                             out_buf = []
 
                             if full_in and len(full_in) > 5:
@@ -1973,7 +1973,7 @@ class BrahmaLive:
                     if response.tool_call:
                         fn_responses = []
                         for fc in response.tool_call.function_calls:
-                            print(f"[BRAHMA] 📞 {fc.name}")
+                            print(f"[MAMAT] 📞 {fc.name}")
                             fr = await self._execute_tool(fc)
                             fn_responses.append(fr)
                         await self.session.send_tool_response(
@@ -1981,12 +1981,12 @@ class BrahmaLive:
                         )
 
         except Exception as e:
-            print(f"[BRAHMA] ❌ Recv: {e}")
+            print(f"[MAMAT] ❌ Recv: {e}")
             traceback.print_exc()
             raise
 
     async def _play_audio(self):
-        print("[BRAHMA] 🔊 Play started")
+        print("[MAMAT] 🔊 Play started")
         loop = asyncio.get_event_loop()
 
         stream = sd.RawOutputStream(
@@ -2002,7 +2002,7 @@ class BrahmaLive:
                 self.set_speaking(True)
                 await asyncio.to_thread(stream.write, chunk)
         except Exception as e:
-            print(f"[BRAHMA] ❌ Play: {e}")
+            print(f"[MAMAT] ❌ Play: {e}")
             raise
         finally:
             self.set_speaking(False)
@@ -2051,7 +2051,7 @@ class BrahmaLive:
 
         while True:
             try:
-                print("[BRAHMA] 🔌 Connecting...")
+                print("[MAMAT] 🔌 Connecting...")
                 self.ui.set_state("THINKING")
                 config = self._build_config()
 
@@ -2064,14 +2064,14 @@ class BrahmaLive:
                         self.audio_in_queue = asyncio.Queue()
                         self.out_queue      = asyncio.Queue(maxsize=10)
 
-                        print("[BRAHMA] ✅ Connected.")
+                        print("[MAMAT] ✅ Connected.")
                         try:
                             self.ui.boot_set_step_status("Connect AI backend", "done")
                             self.ui.boot_set_progress(75, "AI backend connected")
                         except Exception:
                             pass
                         self.ui.set_state("LISTENING")
-                        self.ui.write_log("SYS: Brahma AI online.")
+                        self.ui.write_log("SYS: MAMAT AI online.")
 
                         tg.create_task(self._send_realtime())
                         tg.create_task(self._listen_audio())
@@ -2096,7 +2096,7 @@ class BrahmaLive:
                         pass
 
             except Exception as e:
-                print(f"[BRAHMA] ⚠️ {e}")
+                print(f"[MAMAT] ⚠️ {e}")
                 traceback.print_exc()
                 if _is_gemini_limit_error(e):
                     self._use_openrouter_first = True
@@ -2104,19 +2104,19 @@ class BrahmaLive:
                 self._loop = None
             self.set_speaking(False)
             self.ui.set_state("LISTENING")
-            print("[BRAHMA] 🔄 Reconnecting in 5s...")
+            print("[MAMAT] 🔄 Reconnecting in 5s...")
             await asyncio.sleep(5)
 
 def main():
     _startup_log("main entered")
     _ensure_desktop_shortcut()
-    ui = BrahmaUI(str(BASE_DIR / "assets" / "Brahma_Lite_Logo.png"), show_immediately=True)
+    ui = MAMATUI(str(BASE_DIR / "assets" / "MAMAT_Logo.png"), show_immediately=True)
     dashboard = None
     dashboard_enabled = DashboardServer is not None and not _is_port_in_use(8000)
     if DashboardServer is not None and not dashboard_enabled:
         _startup_log("dashboard disabled: port 8000 already in use")
         try:
-            ui.write_log("SYS: Mobile Connect is already running in another Brahma instance.")
+            ui.write_log("SYS: Mobile Connect is already running in another MAMAT instance.")
         except Exception:
             pass
     if dashboard_enabled:
@@ -2151,7 +2151,7 @@ def main():
         _startup_log("runner waiting api key")
         ui.wait_for_api_key()
         _startup_log("runner api key ready")
-        brahma = BrahmaLive(
+        mamat = MAMATLive(
             ui,
             dashboard=dashboard,
             dashboard_started=dashboard is not None,
@@ -2159,17 +2159,17 @@ def main():
         )
         try:
             if plugin_manager is not None:
-                brahma.plugin_manager = plugin_manager
-                plugin_manager.register_brahma(brahma)
+                mamat.plugin_manager = plugin_manager
+                plugin_manager.register_mamat(mamat)
                 # allow plugins to run a startup hook
                 try:
-                    plugin_manager.dispatch("on_startup", brahma)
+                    plugin_manager.dispatch("on_startup", mamat)
                 except Exception:
                     pass
         except Exception:
             pass
         try:
-            asyncio.run(brahma.run())
+            asyncio.run(mamat.run())
         except KeyboardInterrupt:
             print("\n🔴 Shutting down...")
 

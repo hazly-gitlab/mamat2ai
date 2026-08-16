@@ -1,7 +1,7 @@
 @echo off
 setlocal EnableExtensions EnableDelayedExpansion
 
-title Brahma AI - Lite - Premium Launcher
+title MAMAT AI - Premium Launcher
 cd /d "%~dp0"
 
 set "ROOT=%~dp0"
@@ -14,7 +14,7 @@ set "PYCMD="
 
 echo.
 echo ==============================================
-echo      Brahma AI - Lite  ^| Premium Launcher
+echo      MAMAT AI  ^| Premium Launcher
 echo ==============================================
 echo.
 
@@ -116,11 +116,11 @@ if %errorlevel% neq 0 (
 )
 
 echo.
-echo Launching Brahma AI...
+echo Launching MAMAT AI...
 if exist "%PYW%" (
-  start "Brahma AI - Lite" /b "%PYW%" "%MAIN%" --startup
+  start "MAMAT AI" /b "%PYW%" "%MAIN%" --startup
 ) else (
-  start "Brahma AI - Lite" /b "%PYCMD%" "%MAIN%" --startup
+  start "MAMAT AI" /b "%PYCMD%" "%MAIN%" --startup
 )
 
 echo Launcher complete.

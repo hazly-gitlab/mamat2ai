@@ -1,6 +1,9 @@
 import json, os
 from pathlib import Path
 
+ASSISTANT_NAME = "MAMAT"
+ASSISTANT_FULL_NAME = "MAMAT AI"
+
 _CONFIG_PATH = Path(__file__).parent / "api_keys.json"
 
 def get_config() -> dict:
