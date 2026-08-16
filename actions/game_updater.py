@@ -468,14 +468,14 @@ def _handle_install_dialog(game_name: str) -> str:
         for _ in range(40):
             time.sleep(0.5)
             try:
-                for hwnd in findwindows.find_windows(title_re=r"(?i)(install|yükle|steam)", visible_only=True):
+                for hwnd in findwindows.find_windows(title_re=r"(?i)(install|y\u00fckle|steam)", visible_only=True):
                     try:
                         app  = Application(backend="uia").connect(handle=hwnd)
                         win  = app.window(handle=hwnd)
                         rect = win.rectangle()
                         if win.is_visible() and rect.width() > 300 and rect.height() > 200:
                             all_text = " ".join(c.window_text() for c in win.descendants() if c.window_text()).upper()
-                            if any(x in all_text for x in ("C:", "D:", "E:", "F:", "INSTALL", "YÜKLE")):
+                            if any(x in all_text for x in ("C:", "D:", "E:", "F:", "INSTALL", "Y\u00dcKLE")):
                                 dialog = win
                                 break
                     except Exception:
@@ -491,7 +491,7 @@ def _handle_install_dialog(game_name: str) -> str:
         dialog.set_focus()
         time.sleep(0.4)
         drive_selected  = _select_drive_in_dialog(dialog, drive_letter)
-        install_clicked = _click_button(dialog, ["install", "yükle", "next", "ileri", "ok", "tamam"])
+        install_clicked = _click_button(dialog, ["install", "y\u00fckle", "next", "ileri", "ok", "tamam"])
 
         if install_clicked:
             suffix = f"Selected {drive_label} and" if drive_selected else "Default drive used, but"
@@ -709,7 +709,7 @@ def _get_schedule_status() -> str:
     if result.returncode != 0:
         return "No scheduled game update found."
     for line in result.stdout.strip().split("\n"):
-        if any(k in line for k in ("Next Run", "Sonraki", "Prochaine", "Próxima", "Nächste")):
+        if any(k in line for k in ("Next Run", "Sonraki", "Prochaine", "Pr\u00f3xima", "N\u00e4chste")):
             return f"Game update scheduled. {line.strip()}"
     return "Game update is scheduled."
 

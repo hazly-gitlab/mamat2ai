@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import os
 import platform
@@ -352,10 +353,12 @@ def speak_native(text: str) -> None:
 
     audio_path = os.path.join(tempfile.gettempdir(), f"mamat_edge_tts_{uuid.uuid4().hex}.mp3")
     try:
-        # Use a male neural voice for app speech so daily briefing and alerts sound
-        # closer to MAMAT's normal male audio output.
-        communicator = edge_tts.Communicate(text, voice="en-US-GuyNeural")
-        communicator.save_sync(audio_path)
+        # Use a Malay neural voice if Malay text is detected or default to male neural voice
+        voice = "ms-MY-OsmanNeural" if any(w in text.lower() for w in ("salam", "selamat", "cuaca", "sistem", "bateri")) else "en-US-GuyNeural"
+        async def _save_audio():
+            communicator = edge_tts.Communicate(text, voice=voice)
+            await communicator.save(audio_path)
+        asyncio.run(_save_audio())
     except Exception as exc:  # pragma: no cover
         print(f"[AttentionMonitor] Edge TTS generation failed: {exc}")
         _cleanup_current_audio()

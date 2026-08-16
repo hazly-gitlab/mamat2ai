@@ -8,34 +8,37 @@ import shutil
 import psutil
 import urllib.request
 import json
+import platform
 from pathlib import Path
 from datetime import datetime
 
 # Fallback values
 DEFAULT_CITY = "Kalyan"
 
-def get_time_based_greeting() -> str:
-    """Returns a time-based greeting for Suryaansh."""
+def get_time_based_greeting(device_name: str = "") -> str:
+    """Returns a time-based greeting in Malay starting with Salam, {device_name}."""
+    if not device_name:
+        device_name = platform.node() or os.environ.get("COMPUTERNAME") or os.environ.get("USERNAME") or "USER"
     hour = datetime.now().hour
     if 5 <= hour < 12:
-        greeting = "Good morning, Suryaansh."
+        greeting = f"Salam, {device_name}. Selamat pagi."
     elif 12 <= hour < 17:
-        greeting = "Good afternoon, Suryaansh."
+        greeting = f"Salam, {device_name}. Selamat petang."
     elif 17 <= hour < 22:
-        greeting = "Good evening, Suryaansh."
+        greeting = f"Salam, {device_name}. Selamat malam."
     else:
-        greeting = "Welcome back, Suryaansh."
+        greeting = f"Salam, {device_name}. Selamat kembali."
 
     random_suffixes = [
-        "Ready to help.",
-        "Everything is online.",
-        "Hope you're having a productive day.",
-        "Systems are operational."
+        "Sedia membantu.",
+        "Semua sistem beroperasi dengan baik.",
+        "Semoga hari anda produktif.",
+        "Sistem dalam keadaan stabil."
     ]
     return f"{greeting} {random.choice(random_suffixes)}"
 
 def fetch_weather_info(city: str = DEFAULT_CITY) -> str:
-    """Fetches real-time weather from wttr.in in JSON format."""
+    """Fetches real-time weather from wttr.in in JSON format and returns in Malay."""
     try:
         url = f"https://wttr.in/{city}?format=j1"
         req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
@@ -66,16 +69,16 @@ def fetch_weather_info(city: str = DEFAULT_CITY) -> str:
 
             rain_str = ""
             if chance_of_rain is not None and chance_of_rain > 0:
-                rain_str = f" with a {chance_of_rain} percent chance of rain"
+                rain_str = f" dengan {chance_of_rain} peratus peluang hujan"
 
-            weather_desc_str = f" and {desc}" if desc else ""
-            return f"Today's weather in {city} is {temp} degrees{weather_desc_str}{rain_str}."
+            weather_desc_str = f" dan {desc}" if desc else ""
+            return f"Cuaca hari ini di {city} ialah {temp} darjah Celcius{weather_desc_str}{rain_str}."
     except Exception as e:
         print(f"[DailyBriefing] Weather fetch failed: {e}")
-        return f"Today's weather in {city} is mild with clear skies."
+        return f"Cuaca hari ini di {city} adalah cerah dan baik."
 
 def get_system_status_info() -> tuple[str, dict]:
-    """Collects system status metrics from the OS."""
+    """Collects system status metrics from the OS in Malay."""
     status_parts = []
     state = {}
 
@@ -85,12 +88,12 @@ def get_system_status_info() -> tuple[str, dict]:
         if battery is not None:
             percent = int(battery.percent)
             plugged = bool(battery.power_plugged)
-            charging_str = "charging" if plugged else "discharging"
-            status_parts.append(f"Your battery is at {percent} percent and is currently {charging_str}.")
+            charging_str = "dicas" if plugged else "digunakan"
+            status_parts.append(f"Bateri anda berada pada {percent} peratus dan sedang {charging_str}.")
             state["battery_percent"] = percent
             state["power_plugged"] = plugged
         else:
-            status_parts.append("Your system is running on wall power.")
+            status_parts.append("Sistem anda menggunakan kuasa bekalan elektrik.")
     except Exception:
         pass
 
@@ -98,8 +101,8 @@ def get_system_status_info() -> tuple[str, dict]:
     try:
         cpu = int(psutil.cpu_percent(interval=0.1))
         ram = int(psutil.virtual_memory().percent)
-        cpu_speed_str = "low" if cpu < 30 else "moderate" if cpu < 70 else "high"
-        status_parts.append(f"CPU usage is {cpu_speed_str} at {cpu} percent, and RAM usage is at {ram} percent.")
+        cpu_speed_str = "rendah" if cpu < 30 else "sederhana" if cpu < 70 else "tinggi"
+        status_parts.append(f"Penggunaan CPU adalah {cpu_speed_str} pada {cpu} peratus, dan penggunaan RAM pada {ram} peratus.")
     except Exception:
         pass
 
@@ -107,7 +110,7 @@ def get_system_status_info() -> tuple[str, dict]:
     try:
         total, used, free = shutil.disk_usage(os.path.expanduser("~"))
         free_gb = int(free / (1024 ** 3))
-        status_parts.append(f"You have {free_gb} gigabytes of storage remaining on your primary drive.")
+        status_parts.append(f"Anda mempunyai {free_gb} gigabait storan berbaki pada pemacu utama anda.")
     except Exception:
         pass
 
@@ -115,16 +118,16 @@ def get_system_status_info() -> tuple[str, dict]:
     try:
         # Resolve host to check internet
         socket.create_connection(("1.1.1.1", 53), timeout=2)
-        status_parts.append("Internet connectivity is stable.")
+        status_parts.append("Sambungan internet adalah stabil.")
         state["internet_online"] = True
     except Exception:
-        status_parts.append("Your system appears to be offline.")
+        status_parts.append("Sistem anda kelihatan luar talian.")
         state["internet_online"] = False
 
     return " ".join(status_parts), state
 
 def get_workspace_summary_info() -> tuple[str, dict]:
-    """Scans directories for recent downloads, screenshots, and active projects."""
+    """Scans directories for recent downloads, screenshots, and active projects in Malay."""
     summary_parts = []
     state = {}
 
@@ -136,9 +139,9 @@ def get_workspace_summary_info() -> tuple[str, dict]:
             files = [f for f in downloads_dir.iterdir() if f.is_file()]
             downloads_count = len(files)
             if downloads_count > 0:
-                summary_parts.append(f"I found {downloads_count} files in your Downloads folder.")
+                summary_parts.append(f"Saya menemui {downloads_count} fail dalam folder Muat Turun anda.")
             else:
-                summary_parts.append("Your Downloads folder is clean.")
+                summary_parts.append("Folder Muat Turun anda bersih.")
         except Exception:
             pass
     state["downloads_count"] = downloads_count
@@ -152,7 +155,7 @@ def get_workspace_summary_info() -> tuple[str, dict]:
         if downloads_dir.exists():
             screenshots_count += len([f for f in downloads_dir.iterdir() if f.is_file() and "screenshot" in f.name.lower()])
         if screenshots_count > 0:
-            summary_parts.append(f"There are {screenshots_count} screenshots saved on your system.")
+            summary_parts.append(f"Terdapat {screenshots_count} tangkapan skrin disimpan pada sistem anda.")
     except Exception:
         pass
     state["screenshots_count"] = screenshots_count
@@ -168,7 +171,7 @@ def get_workspace_summary_info() -> tuple[str, dict]:
                 subdirs.sort(key=lambda d: d.stat().st_mtime, reverse=True)
                 recent_project_name = subdirs[0].name.replace("-", " ").title()
                 recent_project_time = subdirs[0].stat().st_mtime
-                summary_parts.append(f"Your most active workspace is {recent_project_name}.")
+                summary_parts.append(f"Ruang kerja paling aktif anda ialah {recent_project_name}.")
         except Exception:
             pass
 
@@ -178,40 +181,41 @@ def get_workspace_summary_info() -> tuple[str, dict]:
     return " ".join(summary_parts), state
 
 def generate_ai_suggestions(system_state: dict, workspace_state: dict) -> str:
-    """Generates context-aware recommendations based on system and workspace states."""
+    """Generates context-aware recommendations based on system and workspace states in Malay."""
     suggestions = []
 
     # 1. Clutter warning
     downloads_count = workspace_state.get("downloads_count", 0)
     if downloads_count > 10:
-        suggestions.append("I noticed your Downloads folder is becoming cluttered. I can organize it whenever you're ready.")
+        suggestions.append("Saya mendapati folder Muat Turun anda semakin penuh. Saya boleh menyusunnya bila-bila masa anda bersedia.")
 
     # 2. Low battery
     battery_percent = system_state.get("battery_percent")
     power_plugged = system_state.get("power_plugged", True)
     if battery_percent is not None and battery_percent < 20 and not power_plugged:
-        suggestions.append("Your battery is below twenty percent. Consider connecting your charger.")
+        suggestions.append("Bateri anda di bawah dua puluh peratus. Sila sambungkan pengecas anda.")
 
     # 3. Recent workspace project
     recent_project = workspace_state.get("recent_project_name")
     recent_time = workspace_state.get("recent_project_time", 0)
     # Check if modified within the last 48 hours
     if recent_project and (time.time() - recent_time) < 172800:
-        suggestions.append(f"Your {recent_project} project was recently edited. Would you like to continue working on it?")
+        suggestions.append(f"Projek {recent_project} anda baru sahaja dikemas kini. Adakah anda ingin meneruskan kerja padanya?")
 
     if suggestions:
         return " ".join(suggestions)
-    return "All systems are set, and I'm ready for your next instruction."
+    return "Semua sistem telah sedia, dan saya bersedia untuk arahan anda yang seterusnya."
 
 def compile_daily_briefing(settings: dict) -> str:
     """Compiles the daily briefing speech text based on user settings."""
     briefing_sections = []
+    device_name = settings.get("user_name") or settings.get("device_name") or platform.node() or os.environ.get("COMPUTERNAME") or os.environ.get("USERNAME") or "USER"
 
     # 1. Voice Greeting (Time-based greeting)
     if settings.get("daily_briefing_voice_greeting", True):
-        briefing_sections.append(get_time_based_greeting())
+        briefing_sections.append(get_time_based_greeting(device_name))
     else:
-        briefing_sections.append("Welcome back, Suryaansh.")
+        briefing_sections.append(f"Salam, {device_name}. Selamat kembali.")
 
     # Collect weather and system status and workspace status
     system_state = {}
@@ -241,7 +245,7 @@ def compile_daily_briefing(settings: dict) -> str:
         briefing_sections.append(generate_ai_suggestions(system_state, workspace_state))
 
     # Final signoff
-    briefing_sections.append("Whenever you're ready, just tell me what you'd like to work on today.")
+    briefing_sections.append("Bila-bila masa anda bersedia, beritahu saya apa yang anda ingin usahakan hari ini.")
 
     # Return formatted speech text with slight pauses between sentences
     return "  \n\n".join(briefing_sections)

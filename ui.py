@@ -435,8 +435,8 @@ def _quote_cmd_arg(path: str) -> str:
 
 
 def _hidden_launch_args(*extra_args: str) -> list[str]:
+    pythonw = Path(sys.executable).parent / ("pythonw.exe" if platform.system() == "Windows" else "python3")
     python = Path(sys.executable)
-    pythonw = python.parent / "pythonw.exe"
     main_py = BASE_DIR / "main.py"
     if getattr(sys, "frozen", False):
         exe = Path(sys.executable)
@@ -449,8 +449,7 @@ def _startup_run_value() -> str:
     if getattr(sys, "frozen", False):
         exe = Path(sys.executable)
         return f'{_quote_cmd_arg(str(exe))} --startup'
-    python = Path(sys.executable)
-    pythonw = python.parent / "pythonw.exe"
+    pythonw = Path(sys.executable).parent / ("pythonw.exe" if platform.system() == "Windows" else "python3")
     main_py = BASE_DIR / "main.py"
     if pythonw.exists():
         return f'{_quote_cmd_arg(str(pythonw))} {_quote_cmd_arg(str(main_py))} --startup'
@@ -595,7 +594,7 @@ class _SysMetrics:
             except Exception:
                 pass
 
-        # macOS â€” powermetrics (GPU Engine)
+        # macOS — powermetrics (GPU Engine)
         if _OS == "Darwin":
             try:
                 r = _quiet_run(
@@ -1062,7 +1061,7 @@ class GestureCameraPreview(QFrame):
         try:
             ret, frame = self._cap.read()
             if not ret or frame is None:
-                self._set_status("Camera feed dropped. Trying again…", "lost")
+                self._set_status("Camera feed dropped. Trying again�", "lost")
                 return
             self._process_frame(frame)
         except Exception as exc:
@@ -1549,7 +1548,7 @@ class HudCanvas(QWidget):
         p.setPen(QColor(245, 248, 255, 235))
         p.drawText(QRectF(cx - 120, y_title, 130, 48), Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter, "MA")
         p.setPen(QColor(255, 98, 98, 245))
-        p.drawText(QRectF(cx + 8, y_title, 110, 48), Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, "MAT")
+        p.drawText(QRectF(cx + 8, y_title, 90, 48), Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, "MAT")
         p.setFont(QFont("Segoe UI", int(max(8, fw * 0.018)), QFont.Weight.Bold))
         p.setPen(QColor(190, 196, 205, 190))
         p.drawText(QRectF(cx - 90, cy + 18, 180, 22), Qt.AlignmentFlag.AlignCenter, "AI ASSISTANT")
@@ -1599,7 +1598,7 @@ class MetricBar(QWidget):
         super().__init__(parent)
         self._label = label
         self._color = color
-        self._value = 0.0       # 0â€“100
+        self._value = 0.0       # 0–100
         self._text  = "--"
         self.setFixedHeight(38)
         self.setMinimumWidth(80)
@@ -1835,14 +1834,14 @@ class TaskCard(QFrame):
 
     def _format_plan(self, plan: list[str] | str | None) -> str:
         if not plan:
-            return "Plan: • Understand the request\n       • Execute the right tools\n       • Return the result"
+            return "Plan: � Understand the request\n       � Execute the right tools\n       � Return the result"
         if isinstance(plan, str):
             text = plan.strip()
             return f"Plan: {text}" if text.lower().startswith("plan:") else f"Plan: {text}"
         items = [str(item).strip() for item in plan if str(item).strip()]
         if not items:
-            return "Plan: • Understand the request\n       • Execute the right tools\n       • Return the result"
-        return "Plan:\n" + "\n".join(f"• {item}" for item in items)
+            return "Plan: � Understand the request\n       � Execute the right tools\n       � Return the result"
+        return "Plan:\n" + "\n".join(f"� {item}" for item in items)
 
     def start_workspace(self, command: str, plan: list[str] | str | None = None, source: str = "local"):
         self._active = True
@@ -2082,7 +2081,7 @@ class ArtifactCard(QFrame):
         name_lbl = QLabel(title or "Generated file")
         name_lbl.setFont(QFont("Segoe UI", 9, QFont.Weight.Bold))
         name_lbl.setStyleSheet("color: #ffffff; background: transparent;")
-        type_lbl = QLabel(f"{file_type} • {status}")
+        type_lbl = QLabel(f"{file_type} � {status}")
         type_lbl.setFont(QFont("Segoe UI", 8))
         type_lbl.setStyleSheet("color: rgba(255,255,255,0.62); background: transparent;")
         meta.addWidget(name_lbl)
@@ -2309,7 +2308,7 @@ class HistoryConversationItem(QFrame):
         lay.setContentsMargins(10, 8, 10, 8)
         lay.setSpacing(10)
 
-        icon = QLabel("M")
+        icon = QLabel("B")
         icon.setFixedSize(30, 30)
         icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
         icon.setStyleSheet("background: rgba(255,69,69,0.10); color: #ff7777; border: 1px solid rgba(255,69,69,0.28); border-radius: 15px; font: 700 11pt 'Segoe UI';")
@@ -2961,7 +2960,7 @@ class WorkspaceSidebar(QWidget):
             self._memory_items.setText("")
             self._memory_frame.hide()
             return
-        self._memory_items.setText("• " + "\n• ".join(texts[:4]))
+        self._memory_items.setText("� " + "\n� ".join(texts[:4]))
         self._memory_frame.show()
 
     def _hide_memory_banner(self):
@@ -3130,7 +3129,7 @@ class WorkspaceSidebar(QWidget):
         if not raw:
             return
         low = raw.lower()
-        if low.startswith(("you:", "mamat ai:")):
+        if low.startswith(("you:", "mamat ai:", "mamat:")):
             return
         if low.startswith("sys:"):
             self.record_chat_event({"role": "system", "text": raw.split(":", 1)[1].strip(), "source": "local"})
@@ -3171,7 +3170,7 @@ class WorkspaceSidebar(QWidget):
         if action == "start":
             command = data.get("command") or ""
             plan = data.get("plan") or []
-            plan_text = plan if isinstance(plan, str) else "\n".join(f"• {item}" for item in plan) if plan else ""
+            plan_text = plan if isinstance(plan, str) else "\n".join(f"� {item}" for item in plan) if plan else ""
             self._task_card.show()
             self._task_card.start_workspace(command, plan, data.get("source") or "local")
             # Intentionally do not post a 'Task started' system message to the activity feed
@@ -3423,7 +3422,7 @@ class InlineChatWorkspace(QFrame):
             self._memory_lbl.setText("")
             self._memory_frame.hide()
             return
-        self._memory_lbl.setText("• " + "\n• ".join(texts[:4]))
+        self._memory_lbl.setText("� " + "\n� ".join(texts[:4]))
         self._memory_frame.show()
 
     def _hide_memories(self):
@@ -3487,7 +3486,7 @@ class InlineChatWorkspace(QFrame):
         if action == "start":
             command = data.get("command") or ""
             plan = data.get("plan") or []
-            plan_text = plan if isinstance(plan, str) else "\n".join(f"• {item}" for item in plan) if plan else ""
+            plan_text = plan if isinstance(plan, str) else "\n".join(f"� {item}" for item in plan) if plan else ""
             self._task_card.start_workspace(command, plan, data.get("source") or "local")
             # Do not emit a 'Task started' system event into the conversation feed.
         elif action == "update":
@@ -3834,9 +3833,13 @@ class LogWidget(QScrollArea):
         if tl.startswith("you:"):
             return "user", "You", raw[4:].strip()
         if tl.startswith("mamat ai:"):
-            return "assistant", "MAMAT", raw[len("MAMAT AI:"):].strip()
+            return "assistant", "MAMAT", raw[len("mamat ai:"):].strip()
+        if tl.startswith("brahma ai:"):
+            return "assistant", "MAMAT", raw[len("brahma ai:"):].strip()
         if tl.startswith("mamat:"):
-            return "assistant", "MAMAT", raw[len("MAMAT:"):].strip()
+            return "assistant", "MAMAT", raw[len("mamat:"):].strip()
+        if tl.startswith("brahma:"):
+            return "assistant", "MAMAT", raw[len("brahma:"):].strip()
         if tl.startswith("file:"):
             return "file", "File", raw[5:].strip()
         if tl.startswith("err:"):
@@ -3846,12 +3849,12 @@ class LogWidget(QScrollArea):
         return "system", "System", raw
 
 _FILE_ICONS = {
-    "image":   ("ðŸ-¼", "#00d4ff"), "video":   ("ðŸŽ¬", "#ff6b00"),
-    "audio":   ("ðŸŽµ", "#cc44ff"), "pdf":     ("ðŸ“„", "#ff4444"),
-    "word":    ("ðŸ“", "#4488ff"), "excel":   ("ðŸ“Š", "#44bb44"),
-    "code":    ("ðŸ’»", "#ffcc00"), "archive": ("ðŸ“¦", "#ff8844"),
-    "pptx":    ("ðŸ“Š", "#ff6622"), "text":    ("ðŸ“ƒ", "#aaaaaa"),
-    "data":    ("ðŸ”§", "#88ddff"), "unknown": ("ðŸ“Ž", "#888888"),
+    "image":   ("�-�", "#00d4ff"), "video":   ("🎬", "#ff6b00"),
+    "audio":   ("🎵", "#cc44ff"), "pdf":     ("📄", "#ff4444"),
+    "word":    ("📝", "#4488ff"), "excel":   ("📊", "#44bb44"),
+    "code":    ("💻", "#ffcc00"), "archive": ("📦", "#ff8844"),
+    "pptx":    ("📊", "#ff6622"), "text":    ("📃", "#aaaaaa"),
+    "data":    ("🔧", "#88ddff"), "unknown": ("📎", "#888888"),
 }
 _EXT_TO_CAT = {
     **dict.fromkeys(["jpg","jpeg","png","gif","webp","bmp","tiff","svg","ico"], "image"),
@@ -4003,13 +4006,13 @@ class _DropCanvas(QWidget):
         p.setFont(QFont("Courier New", 7))
         p.setPen(QPen(qcol("#1a4a5a"), 1))
         p.drawText(QRectF(0, cy + 24, W, 14), Qt.AlignmentFlag.AlignCenter,
-                   "Images Â· Video Â· Audio Â· PDF Â· Docs Â· Code Â· Data")
+                   "Images · Video · Audio · PDF · Docs · Code · Data")
 
     def _paint_drag_over(self, p, W, H):
         cx, cy = W / 2, H / 2
         p.setFont(QFont("Courier New", 20))
         p.setPen(QPen(qcol(C.PRI), 1))
-        p.drawText(QRectF(0, cy - 24, W, 32), Qt.AlignmentFlag.AlignCenter, "â¬‡")
+        p.drawText(QRectF(0, cy - 24, W, 32), Qt.AlignmentFlag.AlignCenter, "⬇")
         p.setFont(QFont("Courier New", 8, QFont.Weight.Bold))
         p.setPen(QPen(qcol(C.PRI), 1))
         p.drawText(QRectF(0, cy + 12, W, 16), Qt.AlignmentFlag.AlignCenter, "Release to load")
@@ -4039,18 +4042,18 @@ class _DropCanvas(QWidget):
         p.setPen(QPen(qcol(C.TEXT_DIM), 1))
         p.drawText(QRectF(tx, H * 0.18 + 18, tw, 14),
                    Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter,
-                   f"{ext_str}  Â·  {size_str}")
+                   f"{ext_str}  ·  {size_str}")
 
         p.setFont(QFont("Courier New", 6))
         p.setPen(QPen(qcol("#1e5c6a"), 1))
         par = str(path.parent)
-        if len(par) > 42: par = "â€¦" + par[-41:]
+        if len(par) > 42: par = "…" + par[-41:]
         p.drawText(QRectF(tx, H * 0.18 + 34, tw, 12),
                    Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, par)
 
         p.setFont(QFont("Courier New", 9, QFont.Weight.Bold))
         p.setPen(QPen(qcol(C.RED, 180), 1))
-        p.drawText(QRectF(W - 34, 0, 28, H), Qt.AlignmentFlag.AlignCenter, "âœ•")
+        p.drawText(QRectF(W - 34, 0, 28, H), Qt.AlignmentFlag.AlignCenter, "✕")
 
     def mousePressEvent(self, e):
         z = self._z
@@ -4094,7 +4097,7 @@ class SetupOverlay(QWidget):
             w.setStyleSheet(f"color: {color}; background: transparent;")
             return w
 
-        layout.addWidget(_lbl("â—ˆ  INITIALISATION REQUIRED", 13, True))
+        layout.addWidget(_lbl("◈  INITIALISATION REQUIRED", 13, True))
         layout.addWidget(_lbl("Configure MAMAT before first boot.", 9, color=C.PRI_DIM))
         layout.addSpacing(6)
 
@@ -4106,7 +4109,7 @@ class SetupOverlay(QWidget):
                                align=Qt.AlignmentFlag.AlignLeft))
         self._key_input = QLineEdit()
         self._key_input.setEchoMode(QLineEdit.EchoMode.Password)
-        self._key_input.setPlaceholderText("AIzaâ€¦")
+        self._key_input.setPlaceholderText("AIza…")
         self._key_input.setFont(QFont("Courier New", 10))
         self._key_input.setFixedHeight(32)
         self._key_input.setStyleSheet(f"""
@@ -4124,7 +4127,7 @@ class SetupOverlay(QWidget):
                        align=Qt.AlignmentFlag.AlignLeft))
         self._or_input = QLineEdit()
         self._or_input.setEchoMode(QLineEdit.EchoMode.Password)
-        self._or_input.setPlaceholderText("sk-or-â€¦")
+        self._or_input.setPlaceholderText("sk-or-…")
         self._or_input.setFont(QFont("Courier New", 10))
         self._or_input.setFixedHeight(32)
         self._or_input.setStyleSheet(f"""
@@ -4154,7 +4157,7 @@ class SetupOverlay(QWidget):
 
         os_row = QHBoxLayout(); os_row.setSpacing(6)
         self._os_btns: dict[str, QPushButton] = {}
-        for key, label in [("windows","âŠž  Windows"),("mac","  macOS"),("linux","ðŸ§  Linux")]:
+        for key, label in [("windows","⊞  Windows"),("mac","  macOS"),("linux","🐧  Linux")]:
             btn = QPushButton(label)
             btn.setFont(QFont("Courier New", 9, QFont.Weight.Bold))
             btn.setFixedHeight(32)
@@ -4174,7 +4177,7 @@ class SetupOverlay(QWidget):
         layout.addWidget(self._status)
         layout.addSpacing(8)
 
-        init_btn = QPushButton("â-¸  INITIALISE SYSTEMS")
+        init_btn = QPushButton("�-�  INITIALISE SYSTEMS")
         init_btn.setFont(QFont("Courier New", 10, QFont.Weight.Bold))
         init_btn.setFixedHeight(36)
         init_btn.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -4526,7 +4529,7 @@ class ScanningOverlay(QWidget):
         self._splash_logo = QLabel()
         self._splash_logo.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._splash_logo.setPixmap(_logo_pixmap(160))
-        self._splash_title = QLabel("MAMAT AI LITE")
+        self._splash_title = QLabel("MAMAT AI")
         self._splash_title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._splash_title.setFont(QFont("Segoe UI", 18, QFont.Weight.Black))
         self._splash_title.setStyleSheet("color: #ffffff; letter-spacing: 2px;")
@@ -4541,7 +4544,7 @@ class ScanningOverlay(QWidget):
         self._splash_status.setStyleSheet(f"color: {C.TEXT_MED};")
 
         # Boot widgets
-        self._boot_title = QLabel("MAMAT AI LITE")
+        self._boot_title = QLabel("MAMAT AI")
         self._boot_title.setFont(QFont("Segoe UI", 20, QFont.Weight.Black))
         self._boot_title.setStyleSheet(f"color: {C.WHITE};")
         self._boot_sub = QLabel("System Boot Sequence")
@@ -4674,7 +4677,7 @@ class BootSequenceOverlay(QWidget):
         self.setWindowOpacity(0.0)
 
         self._device_name = "DEVICE"
-        self._greeting_name = "Suryaansh"
+        self._greeting_name = self._device_name
         self._phase = 0
         self._phase_text = ""
         self._sub_text = ""
@@ -4728,9 +4731,9 @@ class BootSequenceOverlay(QWidget):
                 "s": random.uniform(1.2, 2.2),
             })
 
-    def start(self, device_name: str, greeting_name: str = "Suryaansh"):
-        self._device_name = (device_name or "DEVICE").strip().upper()
-        self._greeting_name = (greeting_name or "Suryaansh").strip() or "Suryaansh"
+    def start(self, device_name: str = "", greeting_name: str = ""):
+        self._device_name = (device_name or platform.node() or os.environ.get("COMPUTERNAME") or "DEVICE").strip()
+        self._greeting_name = (greeting_name or self._device_name).strip() or self._device_name
         self._phase = 0
         self._phase_text = "WELCOME"
         self._sub_text = f"WELCOME, {self._device_name}"
@@ -4818,12 +4821,12 @@ class BootSequenceOverlay(QWidget):
             return
         hour = time.localtime().tm_hour
         if 5 <= hour < 12:
-            greet = "Good Morning"
+            greet = "Selamat Pagi"
         elif 12 <= hour < 18:
-            greet = "Good Afternoon"
+            greet = "Selamat Petang"
         else:
-            greet = "Good Evening"
-        self._set_phase(3, f"{greet}, {self._greeting_name}", "MAMAT is ready.")
+            greet = "Selamat Malam"
+        self._set_phase(3, f"{greet}, {self._greeting_name}", "MAMAT AI sedia.")
 
     def _finish_sequence(self):
         if self._skip_requested:
@@ -5082,7 +5085,7 @@ class BootSequenceOverlay(QWidget):
                 p.drawText(QRectF(0, cy + 150 * scale, rect.width(), 48), Qt.AlignmentFlag.AlignCenter, self._phase_text)
                 p.setPen(QColor(220, 220, 220, 200))
                 p.setFont(QFont("Segoe UI", 14))
-                p.drawText(QRectF(0, cy + 203 * scale, rect.width(), 36), Qt.AlignmentFlag.AlignCenter, "MAMAT is ready.")
+                p.drawText(QRectF(0, cy + 203 * scale, rect.width(), 36), Qt.AlignmentFlag.AlignCenter, "MAMAT AI is ready.")
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key.Key_Escape:
@@ -5602,7 +5605,7 @@ class MainWindow(QMainWindow):
         self.setWindowFlag(Qt.WindowType.Tool, False)
         self.setWindowFlag(Qt.WindowType.Window, True)
         self.setWindowIcon(self._make_window_icon())
-        self.setWindowTitle("MAMAT AI")
+        self.setWindowTitle("MAMAT AI - Lite")
         self.setMinimumSize(_MIN_W, _MIN_H)
         self.resize(_DEFAULT_W, _DEFAULT_H)
 
@@ -5625,6 +5628,7 @@ class MainWindow(QMainWindow):
         self._current_page = "dashboard"
         self._settings_bridge = None
         self._api_ready = False
+        self._device_name = platform.node() or os.environ.get("COMPUTERNAME") or "DEVICE"
         self._app_settings_cache: dict | None = None
         self._overlay: QWidget | None = None
         self._remote_overlay: RemoteKeyOverlay | None = None
@@ -5664,7 +5668,7 @@ class MainWindow(QMainWindow):
         self._clock_tmr.start(1000)
         self._tick_clock()
 
-        # Metrik gÃ¼ncelleme timer'Ä±
+        # Metrik güncelleme timer'ı
         self._metric_tmr = QTimer(self)
         self._metric_tmr.timeout.connect(self._update_metrics)
         self._metric_tmr.start(2000)
@@ -5914,10 +5918,10 @@ class MainWindow(QMainWindow):
                 winreg.KEY_READ | winreg.KEY_WRITE,
             ) as key:
                 try:
-                    value, _ = winreg.QueryValueEx(key, "MAMAT AI")
+                    value, _ = winreg.QueryValueEx(key, "MAMAT AI - Lite")
                     run_value = _startup_run_value()
                     if value != run_value:
-                        winreg.SetValueEx(key, "MAMAT AI", 0, winreg.REG_SZ, run_value)
+                        winreg.SetValueEx(key, "MAMAT AI - Lite", 0, winreg.REG_SZ, run_value)
                     return bool(value)
                 except FileNotFoundError:
                     return False
@@ -5931,10 +5935,10 @@ class MainWindow(QMainWindow):
         try:
             with winreg.CreateKey(winreg.HKEY_CURRENT_USER, _startup_registry_key()) as key:
                 if enabled:
-                    winreg.SetValueEx(key, "MAMAT AI", 0, winreg.REG_SZ, run_value)
+                    winreg.SetValueEx(key, "MAMAT AI - Lite", 0, winreg.REG_SZ, run_value)
                 else:
                     try:
-                        winreg.DeleteValue(key, "MAMAT AI")
+                        winreg.DeleteValue(key, "MAMAT AI - Lite")
                     except FileNotFoundError:
                         pass
             return True
@@ -6104,7 +6108,7 @@ class MainWindow(QMainWindow):
         tmp = snap["tmp"]
         if tmp >= 0:
             tmp_pct = min(100, (tmp / 100) * 100)
-            self._bar_tmp.set_value(tmp_pct, f"{tmp:.0f}Â°C")
+            self._bar_tmp.set_value(tmp_pct, f"{tmp:.0f}°C")
         else:
             self._bar_tmp.set_value(0, "N/A")
         if hasattr(self, "_stat_cam"):
@@ -6179,21 +6183,21 @@ class MainWindow(QMainWindow):
         if hasattr(self, "_clock_lbl") and self._clock_lbl is not None:
             self._clock_lbl.setText(time.strftime("%H:%M"))
         if hasattr(self, "_date_lbl") and self._date_lbl is not None:
-            self._date_lbl.setText(time.strftime("%A • %d %b"))
+            self._date_lbl.setText(time.strftime("%A � %d %b"))
         if hasattr(self, "_core_lbl") and self._core_lbl is not None:
             hour = time.localtime().tm_hour
-            if hour < 12:
-                greeting = "Good Morning"
-            elif hour < 18:
-                greeting = "Good Afternoon"
+            if 5 <= hour < 12:
+                greeting = "Selamat Pagi"
+            elif 12 <= hour < 18:
+                greeting = "Selamat Petang"
             else:
-                greeting = "Good Evening"
-            name = os.getenv("USERNAME") or os.getenv("USER") or "Suryaansh"
+                greeting = "Selamat Malam"
+            name = os.getenv("USERNAME") or os.getenv("USER") or getattr(self, "_device_name", "DEVICE")
             self._core_lbl.setText(f"{greeting}, {name}")
         if hasattr(self, "_core_sub_lbl") and self._core_sub_lbl is not None:
-            self._core_sub_lbl.setText("Ready to assist.")
+            self._core_sub_lbl.setText("Sedia membantu.")
         if hasattr(self, "_core_status_lbl") and self._core_status_lbl is not None:
-            self._core_status_lbl.setText("MAMAT is ready. Gemini 2.5 Flash · OpenRouter · Voice Connected · Memory Enabled")
+            self._core_status_lbl.setText("MAMAT sedia. Gemini 2.5 Flash · OpenRouter · Suara Disambung · Memori Didayakan")
         if hasattr(self, "_cpu_lbl") and self._cpu_lbl is not None:
             self._cpu_lbl.setText(f"CPU {int(psutil.cpu_percent(interval=None))}%")
         if hasattr(self, "_ram_lbl") and self._ram_lbl is not None:
@@ -6210,7 +6214,7 @@ class MainWindow(QMainWindow):
         lay.setContentsMargins(8, 10, 8, 10)
         lay.setSpacing(6)
 
-        hdr = QLabel("â—ˆ SYS MONITOR")
+        hdr = QLabel("◈ SYS MONITOR")
         hdr.setFont(QFont("Courier New", 7, QFont.Weight.Bold))
         hdr.setStyleSheet(f"color: {C.PRI}; background: transparent; "
                           f"border-bottom: 1px solid {C.BORDER}; padding-bottom: 4px;")
@@ -6280,7 +6284,7 @@ class MainWindow(QMainWindow):
         lay.setSpacing(6)
 
         def _sec(txt):
-            l = QLabel(f"â-¸ {txt}")
+            l = QLabel(f"�-� {txt}")
             l.setFont(QFont("Courier New", 7, QFont.Weight.Bold))
             l.setStyleSheet(f"color: {C.TEXT_MED}; background: transparent;")
             return l
@@ -6298,7 +6302,7 @@ class MainWindow(QMainWindow):
         self._drop_zone.file_selected.connect(self._on_file_selected)
         lay.addWidget(self._drop_zone)
 
-        self._file_hint = QLabel("No file loaded â€” drop or click above to upload")
+        self._file_hint = QLabel("No file loaded — drop or click above to upload")
         self._file_hint.setFont(QFont("Courier New", 7))
         self._file_hint.setStyleSheet(f"color: {C.TEXT_MED}; background: transparent;")
         self._file_hint.setWordWrap(True)
@@ -6311,7 +6315,7 @@ class MainWindow(QMainWindow):
         lay.addWidget(_sec("COMMAND INPUT"))
         lay.addLayout(self._build_input_row())
 
-        self._mute_btn = QPushButton("ðŸŽ™  MICROPHONE ACTIVE")
+        self._mute_btn = QPushButton("🎙  MICROPHONE ACTIVE")
         self._mute_btn.setFixedHeight(30)
         self._mute_btn.setFont(QFont("Courier New", 8, QFont.Weight.Bold))
         self._mute_btn.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -6319,7 +6323,7 @@ class MainWindow(QMainWindow):
         self._style_mute_btn()
         lay.addWidget(self._mute_btn)
 
-        fs_btn = QPushButton("â›¶  FULLSCREEN  [F11]")
+        fs_btn = QPushButton("⛶  FULLSCREEN  [F11]")
         fs_btn.setFixedHeight(26)
         fs_btn.setFont(QFont("Courier New", 7))
         fs_btn.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -6340,7 +6344,7 @@ class MainWindow(QMainWindow):
     def _build_input_row(self) -> QHBoxLayout:
         row = QHBoxLayout(); row.setSpacing(5)
         self._input = QLineEdit()
-        self._input.setPlaceholderText("Type a command or questionâ€¦")
+        self._input.setPlaceholderText("Type a command or question…")
         self._input.setFont(QFont("Courier New", 9))
         self._input.setFixedHeight(30)
         self._input.setStyleSheet(f"""
@@ -6353,7 +6357,7 @@ class MainWindow(QMainWindow):
         self._input.returnPressed.connect(self._send)
         row.addWidget(self._input)
 
-        send = QPushButton("â-¸")
+        send = QPushButton("�-�")
         send.setFixedSize(30, 30)
         send.setFont(QFont("Courier New", 11, QFont.Weight.Bold))
         send.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -6379,11 +6383,11 @@ class MainWindow(QMainWindow):
             l.setStyleSheet(f"color: {color}; background: transparent;")
             return l
 
-        lay.addWidget(_fl("[F4] Mute  Â·  [F11] Fullscreen"))
+        lay.addWidget(_fl("[F4] Mute  ·  [F11] Fullscreen"))
         lay.addStretch()
-        lay.addWidget(_fl("Suryaansh Tiwari  Â·  MAMAT AI  Â·  Open Source"))
+        lay.addWidget(_fl("Suryaansh Tiwari  ·  MAMAT AI - Lite  ·  Open Source"))
         lay.addStretch()
-        lay.addWidget(_fl("Â© STARK INDUSTRIES", C.PRI_DIM))
+        lay.addWidget(_fl("© STARK INDUSTRIES", C.PRI_DIM))
         return w
 
     def _on_file_selected(self, path: str):
@@ -6393,7 +6397,7 @@ class MainWindow(QMainWindow):
         icon, _ = _FILE_ICONS.get(cat, _FILE_ICONS["unknown"])
         size = _fmt_size(p.stat().st_size)
         if hasattr(self, "_file_chip") and self._file_chip:
-            self._file_chip.setText(f"Attached: {icon} {p.name}  â€¢  {size}")
+            self._file_chip.setText(f"Attached: {icon} {p.name}  •  {size}")
         self._log.append_log(f"FILE: {p.name} ({size}) loaded")
         if self.on_text_command:
             msg = (
@@ -6480,7 +6484,7 @@ class MainWindow(QMainWindow):
             return
         self._chat_source_queue.append(source or "local")
         if hasattr(self, "_command_card"):
-            preview = txt[:60] + ("…" if len(txt) > 60 else "")
+            preview = txt[:60] + ("�" if len(txt) > 60 else "")
             self._command_card.set_body(preview)
             self._command_card.show()
         if hasattr(self, "_result_card"):
@@ -6503,9 +6507,9 @@ class MainWindow(QMainWindow):
                     self.on_chat_event({"role": "user", "text": user_msg, "source": source})
                 except Exception:
                     pass
-        if hasattr(self, "_result_card") and low.startswith("mamat ai:"):
+        if hasattr(self, "_result_card") and low.startswith(("mamat ai:", "brahma ai:")):
             reply = raw.split(":", 1)[1].strip()
-            self._result_card.set_body(reply[:80] + ("…" if len(reply) > 80 else ""))
+            self._result_card.set_body(reply[:80] + ("�" if len(reply) > 80 else ""))
             self._result_card.show()
             self._restart_card_hide_timer()
             source = self._chat_source_queue[0] if self._chat_source_queue else "local"
@@ -7036,7 +7040,7 @@ class MainWindow(QMainWindow):
         brand_lay.addWidget(_framed_logo(62, 44, bg="rgba(9,10,14,245)", border=C.BORDER_B, radius=10, inset=8))
         brand_text = QVBoxLayout()
         brand_text.setSpacing(2)
-        title = QLabel("<span style='color:#ff4545;'>MAMAT</span><br><span style='color:#ffffff;'>LITE</span>")
+        title = QLabel("<span style='color:#ff4545;'>MAMAT</span><br><span style='color:#ffffff;'>AI</span>")
         title.setFont(QFont("Segoe UI", 16, QFont.Weight.Bold))
         title.setStyleSheet("background: transparent;")
         sub = QLabel("Your AI Assistant")
@@ -7085,10 +7089,10 @@ class MainWindow(QMainWindow):
         status_lay.setSpacing(5)
         online = QLabel("<span style='color:#37ff5f;'>●</span> <span style='color:#a9ffb9; font-weight:700;'>System Online</span>")
         online.setFont(QFont("Segoe UI", 8, QFont.Weight.Bold))
-        name = QLabel("MAMAT AI")
+        name = QLabel("MAMAT AI - Lite")
         name.setFont(QFont("Segoe UI", 9))
         name.setStyleSheet(f"color: {C.TEXT_MED};")
-        ver = QLabel("Version 1.0.0 • Gemini 2.5 Flash")
+        ver = QLabel("Version 1.0.0 � Gemini 2.5 Flash")
         ver.setFont(QFont("Segoe UI", 8))
         ver.setStyleSheet(f"color: {C.TEXT_DIM};")
         status_lay.addWidget(online)
@@ -7119,13 +7123,13 @@ class MainWindow(QMainWindow):
         top_row.setSpacing(14)
         title_box = QVBoxLayout()
         title_box.setSpacing(2)
-        self._core_lbl = QLabel("Good Morning")
+        self._core_lbl = QLabel("Selamat Pagi")
         self._core_lbl.setFont(QFont("Segoe UI", 22, QFont.Weight.Black))
         self._core_lbl.setStyleSheet(f"color: {C.WHITE}; background: transparent; letter-spacing: 1px;")
-        self._core_sub_lbl = QLabel("Ready to assist.")
+        self._core_sub_lbl = QLabel("Sedia membantu.")
         self._core_sub_lbl.setFont(QFont("Segoe UI", 9))
         self._core_sub_lbl.setStyleSheet(f"color: {C.TEXT_DIM}; background: transparent;")
-        self._core_status_lbl = QLabel("MAMAT is ready. Gemini 2.5 Flash · OpenRouter · Voice Connected · Memory Enabled")
+        self._core_status_lbl = QLabel("MAMAT sedia. Gemini 2.5 Flash · OpenRouter · Suara Disambung · Memori Didayakan")
         self._core_status_lbl.setWordWrap(True)
         self._core_status_lbl.setFont(QFont("Segoe UI", 8))
         self._core_status_lbl.setStyleSheet(f"color: #9da8b7; background: transparent;")
@@ -7747,8 +7751,8 @@ class SystemConnectivityPage(QWidget):
         if not key:
             return "Not set"
         if len(key) <= 8:
-            return "••••••••"
-        return f"{key[:4]}••••••••{key[-4:]}"
+            return "��������"
+        return f"{key[:4]}��������{key[-4:]}"
 
     def _provider_row(self, name: str, key: str, model: str, setting_key: str):
         row = QFrame()
@@ -8950,7 +8954,7 @@ class MAMATUI:
         self._app = QApplication.instance() or QApplication(sys.argv)
         self._app.setStyle("Fusion")
         self._app.setQuitOnLastWindowClosed(False)
-        self._app.setApplicationDisplayName("MAMAT AI")
+        self._app.setApplicationDisplayName("MAMAT AI - Lite")
         self._app.setWindowIcon(self._make_app_icon())
         try:
             current_store = workspace_store()
@@ -8991,7 +8995,7 @@ class MAMATUI:
         self._win.minimized.connect(self._on_minimized)
         self._win._state_sig.connect(self._sync_launcher_state)
         self._tray = QSystemTrayIcon(self._make_app_icon(), self._app)
-        self._tray.setToolTip("MAMAT AI")
+        self._tray.setToolTip("MAMAT AI - Lite")
         self._tray.activated.connect(self._on_tray_activated)
         self._tray.setContextMenu(self._build_tray_menu())
         self._tray.show()
@@ -9098,7 +9102,7 @@ class MAMATUI:
                 if enabled:
                     workspace_text = workspace or "No folder selected"
                     self._win._developer_status_lbl.setText(
-                        f"Developer mode is on • {workspace_text}"
+                        f"Developer mode is on � {workspace_text}"
                     )
                     self._win._developer_card.show()
                     self._win._developer_card.raise_()
@@ -9270,7 +9274,7 @@ class MAMATUI:
                     finished_callback()
 
         overlay.finished.connect(_done)
-        overlay.start(device_name=device_name, greeting_name="Suryaansh")
+        overlay.start(device_name=device_name, greeting_name=device_name)
 
     # Thread-safe helpers for driving the boot overlay from background threads
     def boot_add_step(self, text: str):
