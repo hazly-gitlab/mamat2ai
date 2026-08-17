@@ -471,6 +471,10 @@ def _build_project(
         if player:
             player.write_log(f"[DevAgent] {msg}")
 
+    proj_name    = project_name or "mamat_project"
+    proj_name    = re.sub(r"[^\w\-]", "_", proj_name)
+    project_dir  = _resolve_workspace_directory(workspace_path=workspace_path, project_name=proj_name)
+
     log("Planning project structure...")
     if workspace_path:
         log(f"Developer workspace override: {project_dir}")

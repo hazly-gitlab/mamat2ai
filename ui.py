@@ -14,6 +14,7 @@ import time
 import traceback
 from collections import deque
 from pathlib import Path
+from typing import Any
 
 import psutil
 if platform.system() == "Windows":
@@ -25,7 +26,7 @@ from PyQt6.QtCore import (
 )
 from PyQt6.QtGui import (
     QAction, QBrush, QColor, QDragEnterEvent, QDropEvent, QFont, QFontDatabase,
-    QIcon, QImage, QKeySequence, QLinearGradient, QPainter, QPainterPath, QPen, QPixmap,
+    QIcon, QImage, QKeySequence, QLinearGradient, QMovie, QPainter, QPainterPath, QPen, QPixmap,
     QRadialGradient, QShortcut, QTextOption,
 )
 from PyQt6.QtWidgets import (
@@ -54,7 +55,14 @@ APP_SETTINGS_FILE = CONFIG_DIR / "app_settings.json"
 DISCORD_SETTINGS_FILE = CONFIG_DIR / "discord_bot.json"
 LOGO_FILE  = BASE_DIR / "assets" / "MAMAT_Logo.png"
 LOGO_ICO   = BASE_DIR / "assets" / "MAMAT_Logo.ico"
-BACKGROUND_IMAGE_FILE = BASE_DIR / "assets" / "background.png"
+def _find_background_file() -> Path:
+    for name in ("background.gif", "background.png", "background.jpg", "background.jpeg", "background.webp"):
+        p = BASE_DIR / "assets" / name
+        if p.exists():
+            return p
+    return BASE_DIR / "assets" / "background.png"
+
+BACKGROUND_IMAGE_FILE = _find_background_file()
 MODEL_DOWNLOAD_URL = "https://storage.googleapis.com/mediapipe-assets/hand_landmarker.task"
 
 _DEFAULT_W, _DEFAULT_H = 1500, 840
@@ -97,33 +105,49 @@ class BackgroundWidget(QWidget):
         self.setAutoFillBackground(False)
         self._image_path = Path(image_path) if image_path else None
         self._background_pixmap = None
+        self._movie: QMovie | None = None
         self._load_background()
 
     def _load_background(self) -> None:
-        if not self._image_path:
+        if not self._image_path or not self._image_path.exists():
             return
         try:
+            if self._image_path.suffix.lower() == ".gif":
+                movie = QMovie(str(self._image_path))
+                if movie.isValid():
+                    self._movie = movie
+                    self._movie.frameChanged.connect(lambda: self.update())
+                    self._movie.start()
+                    return
             pix = QPixmap(str(self._image_path))
             if not pix.isNull():
                 self._background_pixmap = pix
         except Exception:
             self._background_pixmap = None
+            self._movie = None
 
     def paintEvent(self, event):
-        if not self._background_pixmap:
+        pix = None
+        if self._movie and self._movie.isValid():
+            pix = self._movie.currentPixmap()
+        elif self._background_pixmap:
+            pix = self._background_pixmap
+
+        if not pix or pix.isNull():
             super().paintEvent(event)
             return
+
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform)
         rect = self.rect()
-        pix = self._background_pixmap.scaled(
+        scaled_pix = pix.scaled(
             rect.size(),
             Qt.AspectRatioMode.KeepAspectRatioByExpanding,
             Qt.TransformationMode.SmoothTransformation,
         )
-        x = (rect.width() - pix.width()) // 2
-        y = (rect.height() - pix.height()) // 2
-        painter.drawPixmap(x, y, pix)
+        x = (rect.width() - scaled_pix.width()) // 2
+        y = (rect.height() - scaled_pix.height()) // 2
+        painter.drawPixmap(x, y, scaled_pix)
         painter.fillRect(rect, QColor(2, 3, 5, 28))
         painter.end()
         return

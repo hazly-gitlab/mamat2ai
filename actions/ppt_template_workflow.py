@@ -20,7 +20,7 @@ except Exception as exc:  # pragma: no cover - dependency is already bundled, bu
     BeautifulSoup = None  # type: ignore[assignment]
 
 try:
-    from pptx.enum.shapes import PP_PLACEHOLDER
+    from pptx.enum.shapes import PP_PLACEHOLDER_TYPE as PP_PLACEHOLDER
 except Exception:  # pragma: no cover
     PP_PLACEHOLDER = None  # type: ignore[assignment]
 
@@ -960,7 +960,10 @@ def build_presentation_from_template(
     player=None,
 ) -> str:
     from pptx import Presentation
-    from pptx.enum.shapes import PP_PLACEHOLDER  # type: ignore
+    try:
+        from pptx.enum.shapes import PP_PLACEHOLDER_TYPE as PP_PLACEHOLDER  # type: ignore
+    except ImportError:
+        PP_PLACEHOLDER = None  # type: ignore
 
     prs = Presentation(str(template_path))
     _clear_presentation(prs)
