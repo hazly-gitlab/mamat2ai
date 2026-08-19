@@ -14,7 +14,6 @@ import time
 import traceback
 from collections import deque
 from pathlib import Path
-from typing import Any
 
 import psutil
 if platform.system() == "Windows":
@@ -25,10 +24,12 @@ from PyQt6.QtCore import (
     QTimer, QUrl, QPropertyAnimation, QParallelAnimationGroup, pyqtProperty, pyqtSignal,
 )
 from PyQt6.QtGui import (
-    QAction, QBrush, QColor, QDragEnterEvent, QDropEvent, QFont, QFontDatabase,
-    QIcon, QImage, QKeySequence, QLinearGradient, QMovie, QPainter, QPainterPath, QPen, QPixmap,
+    QAction, QBrush, QColor, QDragEnterEvent, QDropEvent, QFont,
+    QFontDatabase, QIcon, QImage, QKeySequence, QLinearGradient,
+    QMovie, QPainter, QPainterPath, QPen, QPixmap,
     QRadialGradient, QShortcut, QTextOption,
 )
+
 from PyQt6.QtWidgets import (
     QApplication, QCheckBox, QColorDialog, QComboBox, QDialog, QFileDialog, QFrame, QGraphicsOpacityEffect, QGridLayout, QHBoxLayout,
     QLabel, QLineEdit, QMenu, QMainWindow, QPushButton, QScrollArea, QSizePolicy, QSlider, QTextBrowser, QTextEdit,
@@ -36,6 +37,9 @@ from PyQt6.QtWidgets import (
     QStyle, QSystemTrayIcon, QVBoxLayout, QWidget, QProgressBar,
     QStackedWidget, QInputDialog, QMessageBox,
 )
+
+from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
+from PyQt6.QtMultimediaWidgets import QVideoWidget
 
 from discord_bot import DiscordBotService
 from gesture_utils import estimate_gesture_state
@@ -55,14 +59,7 @@ APP_SETTINGS_FILE = CONFIG_DIR / "app_settings.json"
 DISCORD_SETTINGS_FILE = CONFIG_DIR / "discord_bot.json"
 LOGO_FILE  = BASE_DIR / "assets" / "MAMAT_Logo.png"
 LOGO_ICO   = BASE_DIR / "assets" / "MAMAT_Logo.ico"
-def _find_background_file() -> Path:
-    for name in ("background.gif", "background.png", "background.jpg", "background.jpeg", "background.webp"):
-        p = BASE_DIR / "assets" / name
-        if p.exists():
-            return p
-    return BASE_DIR / "assets" / "background.png"
-
-BACKGROUND_IMAGE_FILE = _find_background_file()
+BACKGROUND_IMAGE_FILE = BASE_DIR / "assets" / "background.gif"
 MODEL_DOWNLOAD_URL = "https://storage.googleapis.com/mediapipe-assets/hand_landmarker.task"
 
 _DEFAULT_W, _DEFAULT_H = 1500, 840
@@ -98,59 +95,164 @@ class C:
 
 
 class BackgroundWidget(QWidget):
-    def __init__(self, image_path: Path | str | None = None, parent=None):
+    def __init__(
+        self,
+        image_path: Path | str | None = None,
+        parent=None,
+    ):
         super().__init__(parent)
-        self.setAttribute(Qt.WidgetAttribute.WA_NoSystemBackground, True)
-        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
+
+        self.setAttribute(
+            Qt.WidgetAttribute.WA_NoSystemBackground,
+            True,
+        )
+        self.setAttribute(
+            Qt.WidgetAttribute.WA_TranslucentBackground,
+            True,
+        )
         self.setAutoFillBackground(False)
-        self._image_path = Path(image_path) if image_path else None
-        self._background_pixmap = None
-        self._movie: QMovie | None = None
+
+        self._image_path = (
+            Path(image_path).resolve()
+            if image_path
+            else None
+        )
+
+        self._background_pixmap = QPixmap()
+        self._background_movie = None
+
         self._load_background()
 
     def _load_background(self) -> None:
-        if not self._image_path or not self._image_path.exists():
+        if self._image_path is None:
+            print("[Background] No image path")
             return
+
+        print("[Background] Path:", self._image_path)
+        print("[Background] Exists:", self._image_path.exists())
+
+        if not self._image_path.exists():
+            print("[Background] ERROR: File does not exist")
+            return
+
         try:
             if self._image_path.suffix.lower() == ".gif":
                 movie = QMovie(str(self._image_path))
-                if movie.isValid():
-                    self._movie = movie
-                    self._movie.frameChanged.connect(lambda: self.update())
-                    self._movie.start()
+
+                print("[Background] GIF valid:", movie.isValid())
+                print("[Background] GIF frames:", movie.frameCount())
+
+                if not movie.isValid():
+                    print("[Background] ERROR: Invalid GIF")
                     return
-            pix = QPixmap(str(self._image_path))
-            if not pix.isNull():
-                self._background_pixmap = pix
-        except Exception:
-            self._background_pixmap = None
-            self._movie = None
+
+                self._background_movie = movie
+
+                movie.setCacheMode(
+                    QMovie.CacheMode.CacheAll
+                )
+
+                movie.frameChanged.connect(
+                    self._on_gif_frame_changed
+                )
+
+                # Load first frame
+                movie.jumpToFrame(0)
+
+                first_frame = movie.currentPixmap()
+
+                if not first_frame.isNull():
+                    self._background_pixmap = first_frame
+                    print(
+                        "[Background] First frame:",
+                        first_frame.size(),
+                    )
+
+                movie.start()
+
+                print(
+                    "[Background] Movie state:",
+                    movie.state(),
+                )
+
+                self.update()
+                return
+
+            # Static image
+            pixmap = QPixmap(str(self._image_path))
+
+            if pixmap.isNull():
+                print("[Background] ERROR: Cannot load image")
+                return
+
+            self._background_pixmap = pixmap
+
+            print(
+                "[Background] Static image:",
+                pixmap.size(),
+            )
+
+            self.update()
+
+        except Exception as exc:
+            print(
+                "[Background] ERROR:",
+                repr(exc),
+            )
+
+            self._background_movie = None
+            self._background_pixmap = QPixmap()
+
+    def _on_gif_frame_changed(self, frame_number: int) -> None:
+        if self._background_movie is None:
+            return
+
+        pixmap = self._background_movie.currentPixmap()
+
+        if pixmap.isNull():
+            return
+
+        self._background_pixmap = pixmap
+
+        self.update()
 
     def paintEvent(self, event):
-        pix = None
-        if self._movie and self._movie.isValid():
-            pix = self._movie.currentPixmap()
-        elif self._background_pixmap:
-            pix = self._background_pixmap
+        super().paintEvent(event)
 
-        if not pix or pix.isNull():
-            super().paintEvent(event)
+        if self._background_pixmap.isNull():
             return
 
         painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform)
+
+        painter.setRenderHint(
+            QPainter.RenderHint.SmoothPixmapTransform,
+            True,
+        )
+
         rect = self.rect()
-        scaled_pix = pix.scaled(
+
+        scaled = self._background_pixmap.scaled(
             rect.size(),
             Qt.AspectRatioMode.KeepAspectRatioByExpanding,
             Qt.TransformationMode.SmoothTransformation,
         )
-        x = (rect.width() - scaled_pix.width()) // 2
-        y = (rect.height() - scaled_pix.height()) // 2
-        painter.drawPixmap(x, y, scaled_pix)
-        painter.fillRect(rect, QColor(2, 3, 5, 28))
+
+        x = (rect.width() - scaled.width()) // 2
+        y = (rect.height() - scaled.height()) // 2
+
+        painter.drawPixmap(
+            x,
+            y,
+            scaled,
+        )
+
+        # MAMAT AI overlay
+        painter.fillRect(
+            rect,
+            QColor(2, 3, 5, 28),
+        )
+
         painter.end()
-        return
 
 
 class RemoteKeyOverlay(QWidget):
@@ -526,9 +628,9 @@ class _SysMetrics:
     def __init__(self):
         self.cpu  = 0.0
         self.mem  = 0.0
-        self.net  = 0.0
-        self.gpu  = -1.0
-        self.tmp  = -1.0
+        self.net  = 0.0   
+        self.gpu  = -1.0  
+        self.tmp  = -1.0  
         self._lock = threading.Lock()
         self._last_net = psutil.net_io_counters()
         self._last_net_t = time.time()
@@ -7906,15 +8008,15 @@ class SystemConnectivityPage(QWidget):
         # Shortcuts & Pinning
         shortcuts = self._card("Shortcuts & Pinning", "Create shortcuts and pin MAMAT to your Windows system.")
         shl = shortcuts.layout()
-
+        
         btn_row = QHBoxLayout()
         btn_row.setSpacing(12)
-
+        
         self._desktop_shortcut_btn = QPushButton("Create Desktop Shortcut")
         self._desktop_shortcut_btn.clicked.connect(self._handle_create_desktop_shortcut)
         self._taskbar_pin_btn = QPushButton("Pin to Taskbar")
         self._taskbar_pin_btn.clicked.connect(self._handle_pin_to_taskbar)
-
+        
         btn_row.addWidget(self._desktop_shortcut_btn, 1)
         btn_row.addWidget(self._taskbar_pin_btn, 1)
         shl.addLayout(btn_row)
@@ -8321,14 +8423,14 @@ class SystemConnectivityPage(QWidget):
         success, path_or_err = self._create_desktop_shortcut_logic()
         if success:
             QMessageBox.information(
-                self,
-                "Success",
+                self, 
+                "Success", 
                 f"Desktop shortcut created successfully at:\n{path_or_err}"
             )
         else:
             QMessageBox.warning(
-                self,
-                "Error",
+                self, 
+                "Error", 
                 f"Failed to create desktop shortcut:\n{path_or_err}"
             )
 
@@ -8338,8 +8440,8 @@ class SystemConnectivityPage(QWidget):
             QMessageBox.information(self, "Success", msg)
         else:
             QMessageBox.warning(
-                self,
-                "Taskbar Pinning",
+                self, 
+                "Taskbar Pinning", 
                 msg
             )
 
@@ -8351,7 +8453,7 @@ class SystemConnectivityPage(QWidget):
             import subprocess
             from pathlib import Path
             import winreg
-
+            
             # Find the correct Desktop folder path using registry (OneDrive safe!)
             try:
                 key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders")
@@ -8360,30 +8462,30 @@ class SystemConnectivityPage(QWidget):
                 desktop_dir = Path(os.path.expandvars(desktop_raw))
             except Exception:
                 desktop_dir = Path(os.path.expanduser("~")) / "Desktop"
-
+                
             desktop_dir.mkdir(parents=True, exist_ok=True)
             shortcut_path = desktop_dir / "MAMAT Ai - Premium.lnk"
-
+            
             # Base variables
             base_dir = Path(os.path.abspath("."))
             script_path = base_dir / "main.py"
             icon_path = base_dir / "assets" / "MAMAT_Logo.ico"
-
+            
             python_exe = sys.executable
             if not python_exe:
                 python_exe = shutil.which("pythonw") or shutil.which("python") or "pythonw"
-
+                
             shortcut_target = python_exe
             shortcut_args = f'"{script_path}"'
             if getattr(sys, "frozen", False):
                 shortcut_target = python_exe
                 shortcut_args = ""
-
+                
             powershell_exe = shutil.which("powershell.exe") or "powershell"
-
+            
             def _ps_escape(value: str) -> str:
                 return value.replace("'", "''")
-
+                
             icon_value = str(icon_path) if icon_path.exists() else ""
             ps1_script = "\n".join([
                 "$WshShell = New-Object -ComObject WScript.Shell",
@@ -8396,21 +8498,21 @@ class SystemConnectivityPage(QWidget):
                 f"if ('{_ps_escape(icon_value)}') {{ $Shortcut.IconLocation = '{_ps_escape(icon_value)},0' }}",
                 "$Shortcut.Save()",
             ])
-
+            
             ps1_path = base_dir / "config" / "create_desktop_shortcut.ps1"
             ps1_path.write_text(ps1_script, encoding="utf-8")
-
+            
             subprocess.run(
                 [powershell_exe, "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(ps1_path)],
                 check=True,
                 capture_output=True,
                 text=True,
             )
-
+            
             # Write marker file
             marker_path = base_dir / "config" / ".desktop_shortcut_created"
             marker_path.write_text("created", encoding="utf-8")
-
+            
             return True, str(shortcut_path)
         except Exception as e:
             return False, str(e)
@@ -8422,22 +8524,22 @@ class SystemConnectivityPage(QWidget):
             import shutil
             import subprocess
             from pathlib import Path
-
+            
             # Ensure desktop shortcut exists first
             success, path_or_err = self._create_desktop_shortcut_logic()
             if not success:
                 return False, f"Failed to create desktop shortcut first: {path_or_err}"
-
+                
             shortcut_path = Path(path_or_err)
             if not shortcut_path.exists():
                 return False, "Shortcut file does not exist."
-
+                
             powershell_exe = shutil.which("powershell.exe") or "powershell"
-
+            
             # COM pin script
             def _ps_escape(value: str) -> str:
                 return value.replace("'", "''")
-
+                
             pin_script = "\n".join([
                 "$Shell = New-Object -ComObject Shell.Application",
                 f"$Folder = $Shell.NameSpace('{_ps_escape(str(shortcut_path.parent))}')",
@@ -8445,12 +8547,12 @@ class SystemConnectivityPage(QWidget):
                 "$Verb = $Item.Verbs() | Where-Object { $_.Name.Replace('&', '') -match 'Pin to taskbar' }",
                 "if ($Verb) { $Verb.DoIt(); exit 0 } else { exit 1 }"
             ])
-
+            
             res = subprocess.run(
                 [powershell_exe, "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", pin_script],
                 capture_output=True
             )
-
+            
             if res.returncode == 0:
                 return True, "MAMAT AI has been pinned to your Taskbar!"
             else:
@@ -9662,3 +9764,8 @@ class MAMATUI:
     def stop_speaking(self):
         if not self.muted:
             self.set_state("LISTENING")
+
+
+
+
+
